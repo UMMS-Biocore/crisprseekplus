@@ -3,6 +3,7 @@ library(CRISPRseek)
 library("BSgenome.Hsapiens.UCSC.hg19")
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
+library(shinyjs)
 
 shinyServer(function(input, output) {
   
@@ -235,7 +236,41 @@ output$output1 <- renderUI({
      }
   
       return()
+  
   })
+
+
+#Reset all fields
+
+observeEvent(input$resetFields, {
+  reset("givenOutputDir") 
+  reset("radio1") 
+  reset("radio2") 
+  reset("radio3") 
+  reset("radio4")
+  reset("organism")
+  reset("mismatch") 
+  reset("chromSearch") 
+  reset("overlapgRNA") 
+  reset("gRNASize")
+  reset("baseBefore") 
+  reset("baseAfter") 
+  reset("minGap") 
+  reset("maxGap") 
+  reset("annExon") 
+  reset("searchDir") 
+  reset("pamSize") 
+  reset("REPatSize1") 
+  reset("REPatSize2") 
+  reset("findgRNA1") 
+  reset("annPaired1") 
+  reset("temp") 
+  reset("findgRNA2")
+  reset("annPaired2") 
+  reset("multicore")})
+
+
+
 
 
 })

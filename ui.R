@@ -10,8 +10,12 @@ library(CRISPRseek)
 library("BSgenome.Hsapiens.UCSC.hg19")
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
+library(shinyjs)
+
 
 shinyUI(fluidPage(
+  useShinyjs(),
+  
   titlePanel("CRISPRSeek File Upload"),
   sidebarLayout(
     #File Upload
@@ -48,9 +52,9 @@ shinyUI(fluidPage(
     ),
     
     helpText(a("What is Off Target Analysis?", 
-                  href="~/RTutorials/fileUpload/offTargetAnalysis")),
+                  href="crisprseeker.readthedocs.org")),
     helpText(a("What is Compare 2 Sequences?", 
-               href="~/RTutorials/fileUpload/comp2seq"))
+               href="crisprseeker.readthedocs.org"))
 
     
     ),
@@ -188,9 +192,13 @@ shinyUI(fluidPage(
     fluidRow(
       column(4, actionButton("goButton", "Submit"))
     ),
+    br(),
+    fluidRow(
+      column(4, actionButton("resetFields", "Reset all fields to defaults"))
+    ),
     uiOutput('output1')
   )#mainPanel
   )#sidebarLayout
-)
-)
+))
+
 
