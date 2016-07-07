@@ -10,7 +10,7 @@ shinyServer(function(input, output) {
   inputFile1Path <- system.file("extdata", "rs362331T.fa", package = "CRISPRseek")
   inputFile2Path <- system.file("extdata", "rs362331C.fa", package = "CRISPRseek")
   REpatternFile <- system.file("extdata", "NEBenzymes.fa", package = "CRISPRseek")
-  
+
   output$contents1 <- renderTable({
     inFile <- input$file1
     if (is.null(inFile))
