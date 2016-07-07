@@ -1,4 +1,4 @@
-# crisprseeker
+# crisprseeker v1.0.0
 
 What is Compare 2 Sequences?
 ============================
