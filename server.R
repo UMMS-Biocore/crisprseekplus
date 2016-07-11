@@ -42,8 +42,6 @@ shinyServer(function(input, output) {
     read.csv(inFile4$datapath)
   })
   
-  
-  
 output$output1 <- renderUI({
     #Output Directory
   isolate(  
@@ -201,6 +199,17 @@ output$output1 <- renderUI({
         findgRNAs <- c(FALSE, TRUE)
       }
     })
+    #Change default PAM Sequence
+    isolate(
+      PAM <- input$PAMSeq
+    )
+    #Overwrite existing filesin the output directory each time analysis is run?
+    if(input$overwriteFile == 1) {
+      overwrite <- TRUE
+    }
+    else {
+      overwrite <- FALSE
+    }
 
     #Run off target analysis
     resultsOTA <- eventReactive(input$goButton, {
@@ -208,24 +217,24 @@ output$output1 <- renderUI({
                         REpatternFile =REpatternFile,findPairedgRNAOnly=findPairedgRNAOnly,
                         BSgenomeName = BSgenomeName, txdb=txdb,
                         orgAnn = orgAnn,max.mismatch = input$mismatch, chromToSearch = chromToSearch,
-                        outputDir = outputDir,overwrite = TRUE, 
+                        outputDir = outputDir, overwrite = overwrite, 
                         overlap.gRNA.positions=overlap.gRNA.positions, gRNA.size = gRNA.size,
                         baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM,
                         max.gap = max.gap, annotateExon = annotateExon, enable.multicore = enable.multicore,
                         PAM.size = PAM.size, temperature = temperature, minREpatternSize = input$REPatSize1,
-                        findgRNAs = findgRNAs)
+                        findgRNAs = findgRNAs, PAM = PAM)
       
     })
     
     #run compare 2 sequences
     resultsC2S <- eventReactive(input$goButton, {
       compare2Sequences(inputFile1Path, inputFile2Path, REpatternFile = REpatternFile, outputDir = outputDir, 
-                        overwrite = TRUE, BSgenomeName = BSgenomeName, findgRNAsWithREcutOnly=findgRNAsWithREcutOnly, 
+                        overwrite = overwrite, BSgenomeName = BSgenomeName, findgRNAsWithREcutOnly=findgRNAsWithREcutOnly, 
                         findPairedgRNAOnly=findPairedgRNAOnly,  overlap.gRNA.positions=overlap.gRNA.positions, 
                        gRNA.size = gRNA.size, baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM, 
                        min.gap = min.gap, max.gap = max.gap, PAM.size = PAM.size, temperature = temperature,
                         minREpatternSize = input$REPatSize2, findgRNAs = findgRNAs, max.mismatch = input$mismatch,
-                       searchDirection = searchDirection)
+                       searchDirection = searchDirection, PAM = PAM)
     })
     
     if(isolate(input$chooseAction == 1)) {
@@ -241,7 +250,6 @@ output$output1 <- renderUI({
 
 
 #Reset all fields
-
 observeEvent(input$resetFields, {
   reset("givenOutputDir") 
   reset("radio1") 
@@ -267,10 +275,7 @@ observeEvent(input$resetFields, {
   reset("temp") 
   reset("findgRNA2")
   reset("annPaired2") 
-  reset("multicore")})
-
-
-
-
-
+  reset("multicore")
+  reset("PAMSeq")
+  reset("overwriteFile")})
 })
