@@ -1,10 +1,4 @@
 
-# This is the user-interface definition of a Shiny web application.
-# You can find out more about building applications with Shiny here:
-#
-# http://shiny.rstudio.com
-#
-
 library(shiny)
 library(CRISPRseek)
 library("BSgenome.Hsapiens.UCSC.hg19")
@@ -12,11 +6,10 @@ library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 library(shinyjs)
 
-
 shinyUI(fluidPage(
   useShinyjs(),
   
-  titlePanel("CRISPRSeek File Upload"),
+  titlePanel("CRISPRSeek"),
   sidebarLayout(
     #File Upload
   sidebarPanel(
@@ -52,9 +45,9 @@ shinyUI(fluidPage(
     ),
     
     helpText(a("What is Off Target Analysis?", 
-                  href="crisprseeker.readthedocs.org")),
+                  href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
     helpText(a("What is Compare 2 Sequences?", 
-               href="crisprseeker.readthedocs.org"))
+               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html"))
 
     
     ),
@@ -186,6 +179,14 @@ shinyUI(fluidPage(
                               choices = c("Yes" = 1, "No" = 2), selected = 2))
           
         )
+      ),
+      
+      fluidRow(
+        column(4,
+              textInput("PAMSeq", "Enter PAM Sequence", "NGG")),
+        column(4,
+               radioButtons("overwriteFile", "Overwrite the existing files in output directory?",
+                            choices = c("Yes" = 1, "No" = 2), selected = 1))
       )
       )#Well Panel for advanced settings
     ),
