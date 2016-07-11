@@ -43,14 +43,14 @@ shinyServer(function(input, output) {
   })
   
 output$output1 <- renderUI({
-    #Output Directory
+  #Output Directory
   isolate(  
   if(input$givenOutputDir != "")
       outputDir <- input$givenOutputDir
     else (
-      outputDir <- "~/CRISPRout"
+      outputDir <- tempdir()
     ))
-    
+    setwd(outputDir)
     #Find gRNAs With RE Cut Only?
   isolate(
     if(input$chooseAction == 1) {
@@ -210,10 +210,10 @@ output$output1 <- renderUI({
     else {
       overwrite <- FALSE
     }
-
+    
     #Run off target analysis
     resultsOTA <- eventReactive(input$goButton, {
-        offTargetAnalysis(inputFilePath = inputFilePath, findgRNAsWithREcutOnly=findgRNAsWithREcutOnly,
+      offTargetAnalysis(inputFilePath = inputFilePath, findgRNAsWithREcutOnly=findgRNAsWithREcutOnly,
                         REpatternFile =REpatternFile,findPairedgRNAOnly=findPairedgRNAOnly,
                         BSgenomeName = BSgenomeName, txdb=txdb,
                         orgAnn = orgAnn,max.mismatch = input$mismatch, chromToSearch = chromToSearch,
@@ -231,22 +231,37 @@ output$output1 <- renderUI({
       compare2Sequences(inputFile1Path, inputFile2Path, REpatternFile = REpatternFile, outputDir = outputDir, 
                         overwrite = overwrite, BSgenomeName = BSgenomeName, findgRNAsWithREcutOnly=findgRNAsWithREcutOnly, 
                         findPairedgRNAOnly=findPairedgRNAOnly,  overlap.gRNA.positions=overlap.gRNA.positions, 
-                       gRNA.size = gRNA.size, baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM, 
-                       min.gap = min.gap, max.gap = max.gap, PAM.size = PAM.size, temperature = temperature,
+                        gRNA.size = gRNA.size, baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM, 
+                        min.gap = min.gap, max.gap = max.gap, PAM.size = PAM.size, temperature = temperature,
                         minREpatternSize = input$REPatSize2, findgRNAs = findgRNAs, max.mismatch = input$mismatch,
-                       searchDirection = searchDirection, PAM = PAM)
+                        searchDirection = searchDirection, PAM = PAM)
     })
-    
+
     if(isolate(input$chooseAction == 1)) {
        resultsOTA()
+      
      }
      else if(isolate(input$chooseAction == 2)) {
        resultsC2S()
      }
-  
+    
+    #Download output as zip file
+    output$downloadData <- downloadHandler(
+      filename = function() {
+        paste("crisprSeekOutput","zip", sep=".")
+      },
+      content = function(fname) {
+        crispr <- path.expand(outputDir)
+
+        zip(zipfile = fname, files = crispr)
+      },
+      contentType = "application/zip"
+    )
+    
       return()
-  
   })
+
+
 
 
 #Reset all fields
@@ -279,3 +294,5 @@ observeEvent(input$resetFields, {
   reset("PAMSeq")
   reset("overwriteFile")})
 })
+
+

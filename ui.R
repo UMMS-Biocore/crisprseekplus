@@ -47,9 +47,9 @@ shinyUI(fluidPage(
     helpText(a("What is Off Target Analysis?", 
                   href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
     helpText(a("What is Compare 2 Sequences?", 
-               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html"))
+               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
+    downloadButton("downloadData", "Download Output")
 
-    
     ),
     #Data Entry
     mainPanel(    
