@@ -42,15 +42,21 @@ shinyServer(function(input, output) {
     read.csv(inFile4$datapath)
   })
   
+  
+  #Enable or disable to download button depending on if 
+  #analysis is complete
+  disableDownload <- function() {
+    toggleState(
+      id = "downloadData",
+      condition = input$goButton > 0
+    )
+  }
+  
 output$output1 <- renderUI({
   #Output Directory
   isolate(  
-  if(input$givenOutputDir != "")
-      outputDir <- input$givenOutputDir
-    else (
       outputDir <- tempdir()
-    ))
-    setwd(outputDir)
+    )
     #Find gRNAs With RE Cut Only?
   isolate(
     if(input$chooseAction == 1) {
@@ -122,8 +128,6 @@ output$output1 <- renderUI({
       txdb=TTxDb.Dmelanogaster.UCSC.dm3.ensGene
       orgAnn = org.Mm.egSYMBOL 
     })
-    
-
     #Chromosome to Search?
     isolate(
     chromToSearch <- input$chromSearch
@@ -236,33 +240,32 @@ output$output1 <- renderUI({
                         minREpatternSize = input$REPatSize2, findgRNAs = findgRNAs, max.mismatch = input$mismatch,
                         searchDirection = searchDirection, PAM = PAM)
     })
+    
+    
+    disableDownload()
 
     if(isolate(input$chooseAction == 1)) {
        resultsOTA()
-      
      }
      else if(isolate(input$chooseAction == 2)) {
        resultsC2S()
      }
     
+    setwd(outputDir)
     #Download output as zip file
     output$downloadData <- downloadHandler(
       filename = function() {
         paste("crisprSeekOutput","zip", sep=".")
       },
       content = function(fname) {
-        crispr <- path.expand(outputDir)
-
-        zip(zipfile = fname, files = crispr)
+        crisprOutput <- outputDir
+        
+        zip(zipfile = fname, files = crisprOutput)
       },
       contentType = "application/zip"
     )
-    
       return()
   })
-
-
-
 
 #Reset all fields
 observeEvent(input$resetFields, {
@@ -294,5 +297,6 @@ observeEvent(input$resetFields, {
   reset("PAMSeq")
   reset("overwriteFile")})
 })
+
 
 

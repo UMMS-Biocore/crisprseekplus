@@ -44,21 +44,21 @@ shinyUI(fluidPage(
                          '.csv'))
     ),
     
+    helpText(a(strong("Help Page"), 
+               href="http://crisprseeker.readthedocs.io/en/develop/index.html")),
     helpText(a("What is Off Target Analysis?", 
                   href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
     helpText(a("What is Compare 2 Sequences?", 
                href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
+    helpText(a("How To Use the Interface", 
+               href=" http://crisprseeker.readthedocs.io/en/develop/quickstart.html#using-the-interface")),
+    br(),
     downloadButton("downloadData", "Download Output")
 
     ),
     #Data Entry
     mainPanel(    
     wellPanel(
-      fluidRow(
-        textInput("givenOutputDir", label = "Enter output directory")
-      
-    ),
-  
     fluidRow(
     conditionalPanel(
       condtion <- ("input.chooseAction == 1"),
