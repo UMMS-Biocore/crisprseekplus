@@ -8,8 +8,10 @@ library(shinyjs)
 library(DT)
 
 shinyUI(fluidPage(
-  useShinyjs(),
   
+  shinyjs::useShinyjs(),
+  uiOutput("loading"),
+
   titlePanel("CRISPRSeek"),
   sidebarLayout(
     #File Upload
@@ -57,6 +59,7 @@ shinyUI(fluidPage(
     downloadButton("downloadData", "Download Output")
 
     ),
+
     #Data Entry
     mainPanel( 
     tabsetPanel(
@@ -205,14 +208,19 @@ shinyUI(fluidPage(
     
     tabPanel("Data Table",
              conditionalPanel(
-               condtion <- "input.goButton > 0",
+               condtion <- "input.chooseAction == 1",
                titlePanel("RE Cut Details")
+             ),
+             conditionalPanel(
+               condtion <- "input.chooseAction == 2",
+               titlePanel("Scores for 2 Input Sequences")
              ),
              DT::dataTableOutput("tables")
              )#Tab for Data Table Panel
     )#Tabset Panel
   )#mainPanel
-  )#sidebarLayout
+  ),#sidebarLayout
+  uiOutput("logo")
 ))
 
 
