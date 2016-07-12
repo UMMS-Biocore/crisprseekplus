@@ -4,6 +4,7 @@ library("BSgenome.Hsapiens.UCSC.hg19")
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 library(shinyjs)
+library(DT)
 
 shinyServer(function(input, output) {
   
@@ -51,6 +52,24 @@ shinyServer(function(input, output) {
       condition = input$goButton > 0
     )
   }
+  
+  #Data Tables
+  output$tables <- DT::renderDataTable(DT::datatable({
+    if(input$goButton < 1) {
+      return()
+    }
+    else {
+      if(input$chooseAction == 1) {
+        data <- read.table("/var/folders/9_/dvkkdw717lx099f7bdljwn8w0000gn/T//RtmpMph3Dq/RECutDetails.xls",
+                           header = TRUE)
+      }
+      else if(input$chooseAction == 2) {
+        data <- read.table("/var/folders/9_/dvkkdw717lx099f7bdljwn8w0000gn/T//RtmpMph3Dq/rs362331C.fa-Jul-12-2016/REcutDetails.xls",
+                           header = TRUE)
+
+      }
+    }
+  }))#Data Table
   
 output$output1 <- renderUI({
   #Output Directory
@@ -243,7 +262,6 @@ output$output1 <- renderUI({
     
     
     disableDownload()
-
     if(isolate(input$chooseAction == 1)) {
        resultsOTA()
      }
@@ -296,7 +314,9 @@ observeEvent(input$resetFields, {
   reset("multicore")
   reset("PAMSeq")
   reset("overwriteFile")})
+
 })
+
 
 
 
