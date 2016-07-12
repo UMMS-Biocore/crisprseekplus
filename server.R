@@ -53,24 +53,6 @@ shinyServer(function(input, output) {
     )
   }
   
-  #Data Tables
-  output$tables <- DT::renderDataTable(DT::datatable({
-    if(input$goButton < 1) {
-      return()
-    }
-    else {
-      if(input$chooseAction == 1) {
-        data <- read.table("/var/folders/9_/dvkkdw717lx099f7bdljwn8w0000gn/T//RtmpMph3Dq/RECutDetails.xls",
-                           header = TRUE)
-      }
-      else if(input$chooseAction == 2) {
-        data <- read.table("/var/folders/9_/dvkkdw717lx099f7bdljwn8w0000gn/T//RtmpMph3Dq/rs362331C.fa-Jul-12-2016/REcutDetails.xls",
-                           header = TRUE)
-
-      }
-    }
-  }))#Data Table
-  
 output$output1 <- renderUI({
   #Output Directory
   isolate(  
@@ -270,6 +252,23 @@ output$output1 <- renderUI({
      }
     
     setwd(outputDir)
+    #Data Tables
+    output$tables <- DT::renderDataTable(DT::datatable({
+      if(input$goButton < 1) {
+        return()
+      }
+      else {
+        if(input$chooseAction == 1) {
+          data <- read.table(paste0(outputDir, "/RECutDetails.xls"),
+                             header = TRUE)
+        }
+        else if(input$chooseAction == 2) {
+          data <- read.table(paste0(outputDir, "/rs362331C.fa-Jul-12-2016/REcutDetails.xls"),
+                             header = TRUE)
+          
+        }
+      }
+    }))#Data Table
     #Download output as zip file
     output$downloadData <- downloadHandler(
       filename = function() {
