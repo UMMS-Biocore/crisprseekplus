@@ -5,6 +5,7 @@ library("BSgenome.Hsapiens.UCSC.hg19")
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 library(shinyjs)
+library(DT)
 
 shinyUI(fluidPage(
   useShinyjs(),
@@ -57,7 +58,9 @@ shinyUI(fluidPage(
 
     ),
     #Data Entry
-    mainPanel(    
+    mainPanel( 
+    tabsetPanel(
+      tabPanel("Submissions Panel",
     wellPanel(
     fluidRow(
     conditionalPanel(
@@ -198,6 +201,16 @@ shinyUI(fluidPage(
       column(4, actionButton("resetFields", "Reset all fields to defaults"))
     ),
     uiOutput('output1')
+    ),#Tab for Submission Panel
+    
+    tabPanel("Data Table",
+             conditionalPanel(
+               condtion <- "input.goButton > 0",
+               titlePanel("RE Cut Details")
+             ),
+             DT::dataTableOutput("tables")
+             )#Tab for Data Table Panel
+    )#Tabset Panel
   )#mainPanel
   )#sidebarLayout
 ))
