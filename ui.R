@@ -6,11 +6,15 @@ library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 library(shinyjs)
 library(DT)
+library(GUIDEseq)
 
 shinyUI(fluidPage(
   
   shinyjs::useShinyjs(),
-  uiOutput("loading"),
+  conditionalPanel(
+    condition <- "input.goButton > 0",
+    uiOutput("loading")
+  ),
 
   titlePanel("CRISPRSeek"),
   sidebarLayout(
@@ -18,7 +22,7 @@ shinyUI(fluidPage(
   sidebarPanel(
     radioButtons("chooseAction", "Choose which function you would like to do",
                  choices = list("Off Target Analysis" = 1,
-                            "Compare 2 Sequences" = 2), selected = "1"),
+                            "Compare 2 Sequences" = 2, "GUIDEseq" = 3), selected = "1"),
     
       conditionalPanel(
       condition <- "input.chooseAction == 1",
@@ -46,16 +50,36 @@ shinyUI(fluidPage(
                          'text/comma-separated-values,text/plain', 
                          '.csv'))
     ),
+    conditionalPanel(
+      condition <- "input.chooseAction == 3",
+      paste("GUIDE-Seq File Upload"),
+      br(),
+      fileInput("file5", label = "Choose UMI File",
+                accept=c('text/csv', 
+                         'text/comma-separated-values,text/plain', 
+                         '.csv')),
+      fileInput("file6", label = "Choose Input Alignment File",
+                accept=c('text/csv', 
+                         'text/comma-separated-values,text/plain', 
+                         '.csv')),
+      fileInput("file7", label = "Choose Input gRNA File",
+                accept=c('text/csv', 
+                         'text/comma-separated-values,text/plain', 
+                         '.csv'))
+    ),
     
     helpText(a(strong("Help Page"), 
                href="http://crisprseeker.readthedocs.io/en/develop/index.html")),
     helpText(a("What is Off Target Analysis?", 
-                  href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
+                  href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-off-target-analysis")),
     helpText(a("What is Compare 2 Sequences?", 
-               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
+               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-compare-2-sequences")),
+    helpText(a("What is GUIDEseq?", 
+               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-guide-seq-analysis")),
     helpText(a("How To Use the Interface", 
                href=" http://crisprseeker.readthedocs.io/en/develop/quickstart.html#using-the-interface")),
     br(),
+    
     downloadButton("downloadData", "Download Output")
 
     ),
@@ -94,7 +118,15 @@ shinyUI(fluidPage(
              selectInput("organism", "Organism:",
                          choices = list("hg19" = 1, "mm10" = 2,
                                         "ce6" = 3, "rn5" = 4, 
-                                        "dm3" = 5), selected = 1))),
+                                        "dm3" = 5), selected = 1)),
+      conditionalPanel(
+        condition <- "input.chooseAction == 3",
+        column(4,
+        numericInput("minR1", "Max mapped R1 bp length to be considered for downstream analysis",
+                     value = 30)),
+        column(4,
+               numericInput("minR2", "Max mapped R2 bp length to be considered for downstream analysis",
+                            value = 30)))),
     br(),
       fluidRow(
         column(4,
@@ -103,7 +135,15 @@ shinyUI(fluidPage(
           condtion <- ("input.chooseAction == 1"),
           column(4,
                textInput("chromSearch", "Chromosome to search:", value = "chrX"))
-      ))),
+      ),
+      conditionalPanel(
+        condtion <- ("input.chooseAction == 3"),
+        column(4,
+               radioButtons("sameChrom", "Paired reads aligned to same chromosome?",
+                            choices = list("Yes" = 1, "No" = 2),
+                            selected = 1))
+      )
+      )),
 
     
   
@@ -122,42 +162,52 @@ shinyUI(fluidPage(
       fluidRow(
         column(4,
                numericInput("gRNASize", "Enter gRNA size", value = 20)),
-        column(4,
-               numericInput("baseBefore", "Number bases before gRNA for efficiency", value = 4)),
-        column(4,
-               numericInput("baseAfter", "Number bases after PAM for efficiency", value = 3))
-      ),
-      fluidRow(
-        column(4,
-               numericInput("minGap", "Minimum distance between two oppositely oriented 
-                            gRNAs to be validly paired", value = 0)),
-        column(4,
-               numericInput("maxGap", "Maximum distance between two oppositely oriented 
-                            gRNAs to be validly paired", value = 20)),
         conditionalPanel(
-          condtion <- "input.chooseAction == 1",
+          condtion <- "input.chooseAction == 1 || input.chooseAction == 2",
           column(4,
-                 radioButtons("annExon", "Indicate whether off target is inside an exon?",
-                              choices = list("Yes" = 1, "No" = 2),
-                              selected = 1))),
-        conditionalPanel(
-          condtion <- "input.chooseAction == 2",
+                 numericInput("baseBefore", "Number bases before gRNA for efficiency", value = 4)),
           column(4,
-                 checkboxGroupInput("searchDir", "Search direction",
-                              choices = list("Both" = "both", "1to2" = "1to2", "2to1" = "2to1"),
-                              selected = c("both", "1to2", "2to1"))))
+                 numericInput("baseAfter", "Number bases after PAM for efficiency", value = 3))),
+          conditionalPanel(
+            condition <- "input.chooseAction == 3",
+            column(4,
+                 numericInput("pamSize", "Set PAM length", value = 3)))
         ),
-      fluidRow(
-        column(4,
-               numericInput("pamSize", "Set PAM length", value = 3)),
-        column(4,
-               numericInput("temp", "Set temperature (celsius)", value = 37)),
-        conditionalPanel(
-          condtion <- "input.chooseAction == 1",
-        column(4,
-               radioButtons("multicore", "Enable parallel processing?",
-                            choices = list("Yes" = 1, "No" = 2),
-                            selected = 2)))),
+      conditionalPanel(
+        condtion <- "input.chooseAction == 1 || input.chooseAction == 2",
+        fluidRow(
+          column(4,
+                 numericInput("minGap", "Minimum distance between two oppositely oriented 
+                            gRNAs to be validly paired", value = 0)),
+          column(4,
+                 numericInput("maxGap", "Maximum distance between two oppositely oriented 
+                            gRNAs to be validly paired", value = 20)),
+          conditionalPanel(
+            condtion <- "input.chooseAction == 1",
+            column(4,
+                   radioButtons("annExon", "Indicate whether off target is inside an exon?",
+                                choices = list("Yes" = 1, "No" = 2),
+                                selected = 1))),
+          conditionalPanel(
+            condtion <- "input.chooseAction == 2",
+            column(4,
+                   checkboxGroupInput("searchDir", "Search direction",
+                                      choices = list("Both" = "both", "1to2" = "1to2", "2to1" = "2to1"),
+                                      selected = c("both", "1to2", "2to1"))))
+        )),
+      conditionalPanel(
+        condtion <- "input.chooseAction == 1 || input.chooseAction == 2",
+        fluidRow(
+          column(4,
+                 numericInput("pamSize", "Set PAM length", value = 3)),
+          column(4,
+                 numericInput("temp", "Set temperature (celsius)", value = 37)),
+          conditionalPanel(
+            condtion <- "input.chooseAction == 1",
+            column(4,
+                   radioButtons("multicore", "Enable parallel processing?",
+                                choices = list("Yes" = 1, "No" = 2),
+                                selected = 2))))),
       fluidRow(
         conditionalPanel(
           condition <- "input.chooseAction == 1",
@@ -168,9 +218,7 @@ shinyUI(fluidPage(
                               choices = c("Yes" = 1, "No" = 2), selected = 1)),
           column(4,
                  radioButtons("annPaired1", "Annotate paired information?",
-                              choices = c("Yes" = 1, "No" = 2), selected = 1))
-          
-        ),
+                              choices = c("Yes" = 1, "No" = 2), selected = 1))),
         conditionalPanel(
           condition <- "input.chooseAction == 2",
           column(4,
@@ -214,6 +262,10 @@ shinyUI(fluidPage(
              conditionalPanel(
                condtion <- "input.chooseAction == 2",
                titlePanel("Scores for 2 Input Sequences")
+             ),
+             conditionalPanel(
+               condtion <- "input.chooseAction == 3",
+               titlePanel("gRNA Peaks")
              ),
              DT::dataTableOutput("tables")
              )#Tab for Data Table Panel
