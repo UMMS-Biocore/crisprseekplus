@@ -8,43 +8,53 @@ library(DT)
 library(GUIDEseq)
 
 shinyServer(function(input, output) {
+  
+  output$loading <- renderUI({
+    getLoadingMsg()
+  })
+  output$logo <- renderUI({
+    getLogo()
+  })
+  
   #' getLoadingMsg
   #'
   #' @note \code{getLoadingMsg}
   #' @return loading msg
   #' @examples
-  #'    x <- getLoadingMsg()
+  #'     x <- getLoadingMsg()
   #' @export
   #'
   getLoadingMsg <- function() {
-    imgsrc <- "www/images/loading.gif"
+    imgsrc <- "images/loading.gif"
     a <- list(
       tags$head(tags$style(type = "text/css", "
-            #loadmessage {
-            position: fixed;
-            top: 0px;
-            left: 200px;
-            width: 70%;
-            height: 100;
-            padding: 5px 0px 5px 0px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 100%;
-            color: #000000;
-            opacity: 0.8;
-            background-color: #FFFFFFF;
-            z-index: 100;
-            }")),
-      conditionalPanel(condition = "$('html').hasClass('shiny-busy')",
-                       tags$div("Please wait! Loading...", id = "loadmessage",
-                                tags$img(src = imgsrc
-                                ))))
-  }
-  
+                           #loadmessage {
+                           position: fixed;
+                           top: 0px;
+                           left: 200px;
+                           width: 70%;
+                           height: 100;
+                           padding: 5px 0px 5px 0px;
+                           text-align: center;
+                           font-weight: bold;
+                           font-size: 100%;
+                           color: #000000;
+                           opacity: 0.8;
+                           background-color: #FFFFFFF;
+                           z-index: 100;
+  }")),
+        conditionalPanel(condition = "$('html').hasClass('shiny-busy')",
+                         tags$div("Please wait! Loading...", id = "loadmessage",
+                                  tags$img(src = imgsrc
+                                  ))),
+        
+      conditionalPanel(condition = "!$('html').hasClass('shiny-busy')",
+                         tags$div("Analysis complete! Click 'Download Output'", id = "loadmessage" ))
+      )
+}
   
   #' getLogo
   #'
-  #' Generates and displays the logo to be shown within DEBrowser.
   #'
   #' @note \code{getLogo}
   #' @return return logo
@@ -53,16 +63,9 @@ shinyServer(function(input, output) {
   #' @export
   #'
   getLogo <- function(){
-    imgsrc <- "www/images/logo.png"
+    imgsrc <- "images/logo.png"
     a<-list(img(src=imgsrc, align = "left"))
   }
-  
-  output$loading <- renderUI({
-    getLoadingMsg()
-  })
-  output$logo <- renderUI({
-    getLogo()
-  })
   
   #Enable or disable to download button depending on if 
   #analysis is complete
@@ -335,6 +338,7 @@ output$output1 <- renderUI({
     
     
     setwd(outputDir)
+    
     disableDownload()
     if(isolate(input$chooseAction == 1)) {
        resultsOTA()

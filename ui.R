@@ -11,7 +11,10 @@ library(GUIDEseq)
 shinyUI(fluidPage(
   
   shinyjs::useShinyjs(),
-  uiOutput("loading"),
+  conditionalPanel(
+    condition <- "input.goButton > 0",
+    uiOutput("loading")
+  ),
 
   titlePanel("CRISPRSeek"),
   sidebarLayout(
@@ -68,14 +71,15 @@ shinyUI(fluidPage(
     helpText(a(strong("Help Page"), 
                href="http://crisprseeker.readthedocs.io/en/develop/index.html")),
     helpText(a("What is Off Target Analysis?", 
-                  href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
+                  href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-off-target-analysis")),
     helpText(a("What is Compare 2 Sequences?", 
-               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
+               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-compare-2-sequences")),
     helpText(a("What is GUIDEseq?", 
-               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html")),
+               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-guide-seq-analysis")),
     helpText(a("How To Use the Interface", 
                href=" http://crisprseeker.readthedocs.io/en/develop/quickstart.html#using-the-interface")),
     br(),
+    
     downloadButton("downloadData", "Download Output")
 
     ),
