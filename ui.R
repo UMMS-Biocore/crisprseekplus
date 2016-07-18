@@ -9,14 +9,17 @@ library(DT)
 library(GUIDEseq)
 
 shinyUI(fluidPage(
-  
   shinyjs::useShinyjs(),
+  
   conditionalPanel(
     condition <- "input.goButton > 0",
     uiOutput("loading")
   ),
-
-  titlePanel("CRISPRSeek"),
+  uiOutput("logo"),
+  titlePanel(h1("CRISPRSeeker")),
+  br(),
+  br(),
+  br(),
   sidebarLayout(
     #File Upload
   sidebarPanel(
@@ -69,15 +72,23 @@ shinyUI(fluidPage(
     ),
     
     helpText(a(strong("Help Page"), 
-               href="http://crisprseeker.readthedocs.io/en/develop/index.html")),
+               href="http://crisprseeker.readthedocs.io/en/develop/index.html",
+               TARGET="_blank")),
     helpText(a("What is Off Target Analysis?", 
-                  href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-off-target-analysis")),
+                  href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-off-target-analysis",
+               TARGET="_blank")),
     helpText(a("What is Compare 2 Sequences?", 
-               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-compare-2-sequences")),
+               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-compare-2-sequences",
+               TARGET="_blank")),
     helpText(a("What is GUIDEseq?", 
-               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-guide-seq-analysis")),
+               href="http://crisprseeker.readthedocs.io/en/latest/quickstart.html#what-is-guide-seq-analysis",
+               TARGET="_blank")),
     helpText(a("How To Use the Interface", 
-               href=" http://crisprseeker.readthedocs.io/en/develop/quickstart.html#using-the-interface")),
+               href=" http://crisprseeker.readthedocs.io/en/develop/quickstart.html#using-the-interface",
+               TARGET="_blank")),
+    helpText(a("About Files", 
+               href=" http://crisprseeker.readthedocs.io/en/develop/quickstart.html#about-files",
+               TARGET="_blank")),
     br(),
     
     downloadButton("downloadData", "Download Output")
@@ -271,8 +282,7 @@ shinyUI(fluidPage(
              )#Tab for Data Table Panel
     )#Tabset Panel
   )#mainPanel
-  ),#sidebarLayout
-  uiOutput("logo")
+  )#sidebarLayout
 ))
 
 

@@ -70,3 +70,7 @@ After analysis is complete, you may download the output data as a zip file by cl
 Under the Data Table panel, upon completing analyses on the data, sample data tables will be available. For off target analysis, the example data table is for the "RE Cut Details" output. For compare 2 sequences, the
 shown data table is the "Scores for 2 Input Sequences" output file. Lastly, for GUIDE-seq, the output data table is the data from the "gRNA Peaks" output file.
 
+About Files
+============================
+The maximum file size that can be uploaded is 1 GB. Anything larger will not be accepted by the application. If no files are uploaded, the demo files will be used in analysis.
+Adding large files may take a while to upload, as well as analysze. Refer to the prompt at the top of the screen that will tell if the file is still being anaylyzed, or if the analysis is complete.

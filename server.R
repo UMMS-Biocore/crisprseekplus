@@ -8,6 +8,10 @@ library(DT)
 library(GUIDEseq)
 
 shinyServer(function(input, output) {
+
+options( shiny.maxRequestSize = 1000 * 1024 ^ 2,
+           shiny.fullstacktrace = FALSE, shiny.trace=FALSE, 
+           shiny.autoreload=TRUE)
   
   output$loading <- renderUI({
     getLoadingMsg()
@@ -64,7 +68,7 @@ shinyServer(function(input, output) {
   #'
   getLogo <- function(){
     imgsrc <- "images/logo.png"
-    a<-list(img(src=imgsrc, align = "left"))
+    a<-list(img(src=imgsrc, align = "right"))
   }
   
   #Enable or disable to download button depending on if 
@@ -75,6 +79,11 @@ shinyServer(function(input, output) {
       condition = input$goButton > 0
     )
   }
+  
+  observeEvent(input$hideShow, {
+    # every time the button is pressed, alternate between hiding and showing the plot
+    toggle("consolePanel")
+  })
   
 output$output1 <- renderUI({
   
@@ -252,9 +261,9 @@ output$output1 <- renderUI({
     #Search direction 
     searchDirection <- c()
     isolate(
-    append(searchDirection, input$searchDir)
-    )
-
+    searchDirection <- append(searchDirection, input$searchDir)
+    ) 
+    
     #Find gRNA from input?
     isolate(
     if(input$chooseAction == 1) {
@@ -284,22 +293,26 @@ output$output1 <- renderUI({
       PAM <- input$PAMSeq
     )
     #Overwrite existing filesin the output directory each time analysis is run?
+    isolate(
     if(input$overwriteFile == 1) {
       overwrite <- TRUE
     }
     else {
       overwrite <- FALSE
-    }
+    })
     #Max mapped R1 bp length to be considered for downstream analysis
-    min.R1.mapped <- input$minR1
-    min.R2.mapped <- input$minR2
+    isolate(
+    min.R1.mapped <- input$minR1)
+    isolate(
+    min.R2.mapped <- input$minR2)
     #Specify whether the paired reads are required to align to the same chromosme
+    isolate(
     if(input$sameChrom == 1) {
       same.chromosome <- TRUE
     }
     else {
       same.chromosome <- FALSE
-    }
+    })
     
     #Run off target analysis
     resultsOTA <- eventReactive(input$goButton, {
@@ -340,7 +353,8 @@ output$output1 <- renderUI({
     setwd(outputDir)
     
     disableDownload()
-    if(isolate(input$chooseAction == 1)) {
+
+      if(isolate(input$chooseAction == 1)) {
        resultsOTA()
      }
      else if(isolate(input$chooseAction == 2)) {
@@ -349,6 +363,7 @@ output$output1 <- renderUI({
     else if(isolate(input$chooseAction == 3)) {
       resultsGSA()
     }
+    
 
     #Data Tables
     output$tables <- DT::renderDataTable(DT::datatable({
@@ -377,12 +392,12 @@ output$output1 <- renderUI({
         paste("crisprSeekOutput","zip", sep=".")
       },
       content = function(fname) {
-        crisprOutput <- outputDir
-        
+        crisprOutput <- list.files(path = outputDir)
         zip(zipfile = fname, files = crisprOutput)
       },
       contentType = "application/zip"
     )
+    
       return()
   })
 
