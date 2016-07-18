@@ -313,6 +313,76 @@ output$output1 <- renderUI({
     else {
       same.chromosome <- FALSE
     })
+    isolate(
+      if(input$umiheader == 1) {
+        umi.header <- TRUE
+      }
+      else {
+        umi.header <- FALSE
+      }
+    )
+    isolate(
+      read.ID.col <- input$readID
+    )
+    isolate(
+      umi.col <- input$umicol
+    )
+    isolate(
+      if(input$concordantStrand == 1) {
+        concordant.strand <- FALSE
+      }
+      else {
+        concordant.strand <- TRUE
+      }
+    )
+    isolate(
+      max.paired.distance <- input$maxPairedDistance
+    )
+    isolate(
+      min.mapping.quality <- input$minMapQuality
+    )
+    isolate(
+      distance.inter.chrom <- input$distInterChrom
+    )
+    isolate(
+      if(input$applyMinMapped == 1) {
+        apply.both.min.mapped <- TRUE
+      }
+      else {
+        apply.both.min.mapped <- FALSE
+      }
+    )
+    isolate(
+      min.reads <- input$minReads
+    )
+    isolate(
+      maxP <- input$max.P
+    )
+    isolate(
+      if(input$stat == 1) {
+        stats <- "poisson"
+      }
+      else {
+        stats <- "nbinom"
+      }
+    )
+    isolate(
+      distance.threshold <- input$distThreshold
+    )
+    isolate(
+      PAM.pattern <- input$PAMpattern
+    )
+    
+    v <- as.numeric(unlist(strsplit(input$weight,",")))
+    isolate(
+      if(length(v) < gRNA.size) {
+        x <- (gRNA.size - length(weights))
+        padZeros <- vector("numeric", length = x)
+        weights <- append(padZeros, v)
+      }
+      else {
+        weights <- v
+      })
     
     #Run off target analysis
     resultsOTA <- eventReactive(input$goButton, {
@@ -325,7 +395,7 @@ output$output1 <- renderUI({
                         baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM,
                         max.gap = max.gap, annotateExon = annotateExon, enable.multicore = enable.multicore,
                         PAM.size = PAM.size, temperature = temperature, minREpatternSize = input$REPatSize1,
-                        findgRNAs = findgRNAs, PAM = PAM)
+                        findgRNAs = findgRNAs, PAM = PAM, PAM.pattern = PAM.pattern)
       
     })
     
@@ -337,7 +407,7 @@ output$output1 <- renderUI({
                         gRNA.size = gRNA.size, baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM, 
                         min.gap = min.gap, max.gap = max.gap, PAM.size = PAM.size, temperature = temperature,
                         minREpatternSize = input$REPatSize2, findgRNAs = findgRNAs, max.mismatch = input$mismatch,
-                        searchDirection = searchDirection, PAM = PAM)
+                        searchDirection = searchDirection, PAM = PAM, PAM.pattern = PAM.pattern)
     })
     
     #run GUIDEseqAnalysis
@@ -345,9 +415,13 @@ output$output1 <- renderUI({
       GUIDEseqAnalysis(alignment.inputfile = bamfile, umi.inputfile = umifile,
                        BSgenomeName = BSgenomeName, gRNA.file = gRNA.file,
                        outputDir = outputDir, overlap.gRNA.positions = overlap.gRNA.positions,
-                       PAM.size = PAM.size, gRNA.size = gRNA.size,PAM = PAM, max.mismatch = input$mismatch,
+                       PAM.size = PAM.size, PAM.pattern = PAM.pattern, gRNA.size = gRNA.size,PAM = PAM, max.mismatch = input$mismatch,
                        overwrite = overwrite, min.R1.mapped = min.R1.mapped, min.R2.mapped = min.R2.mapped,
-                       same.chromosome = same.chromosome)})
+                       same.chromosome = same.chromosome, umi.header = umi.header, read.ID.col = read.ID.col,
+                       umi.col = umi.col, concordant.strand = concordant.strand, max.paired.distance = max.paired.distance,
+                       min.mapping.quality = min.mapping.quality, distance.inter.chrom = distance.inter.chrom,
+                       apply.both.min.mapped = apply.both.min.mapped, min.reads = min.reads, maxP = maxP, stats = stats,
+                       distance.threshold = distance.threshold, weights = weights)})
     
     
     setwd(outputDir)
@@ -432,7 +506,21 @@ observeEvent(input$resetFields, {
   reset("overwriteFile")
   reset("minR1")
   reset("minR2")
-  reset("sameChrom")})
+  reset("sameChrom")
+  reset("umiheader")
+  reset("readID")
+  reset("umicol")
+  reset("concordantStrand")
+  reset("maxPairedDistance")
+  reset("minMapQuality")
+  reset("distInterChrom")
+  reset("applyMinMapped")
+  reset("minReads")
+  reset("max.P")
+  reset("stat")
+  reset("distThreshold")
+  reset("PAMpattern")
+  reset("weight")})
 })
 
 
