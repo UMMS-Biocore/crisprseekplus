@@ -38,8 +38,13 @@ shinyUI(fluidPage(
         fileInput("file2", label = "Choose Pattern File",
                   accept=c('text/csv', 
                            'text/comma-separated-values,text/plain', 
-                           '.csv'))
-      ),
+                           '.csv')),
+        conditionalPanel(
+          condition <- "input.scoringmethod == 2",
+          fileInput("mismatchActivityFile", label = "Choose Mismatch Activity File",
+                    accept=c('text/csv', 
+                             'text/comma-separated-values,text/plain', 
+                             '.csv')))),
       conditionalPanel(
         condition <- "input.chooseAction == 2",
         paste("Compare 2 Sequences File Upload"),
@@ -51,7 +56,13 @@ shinyUI(fluidPage(
         fileInput("file4", label = "Choose Input File 2",
                   accept=c('text/csv', 
                            'text/comma-separated-values,text/plain', 
-                           '.csv'))
+                           '.csv')),
+        conditionalPanel(
+          condition <- "input.scoringmethod == 2",
+          fileInput("mismatchActivityFile", label = "Choose Mismatch Activity File",
+                    accept=c('text/csv', 
+                             'text/comma-separated-values,text/plain', 
+                             '.csv')))
       ),
       conditionalPanel(
         condition <- "input.chooseAction == 3",
@@ -68,8 +79,7 @@ shinyUI(fluidPage(
         fileInput("file7", label = "Choose Input gRNA File",
                   accept=c('text/csv', 
                            'text/comma-separated-values,text/plain', 
-                           '.csv'))
-      ),
+                           '.csv'))),
       
       helpText(a(strong("Help Page"), 
                  href="http://crisprseeker.readthedocs.io/en/develop/index.html",
@@ -99,7 +109,33 @@ shinyUI(fluidPage(
     mainPanel( 
       tabsetPanel(
         tabPanel("Submissions Panel",
+                wellPanel(
+                  fluidRow(
+                    numericInput("runNum", "Enter Run Number for Output File Title:", "")
+                  )
+                ),
                  wellPanel(
+                   fluidRow(
+                     conditionalPanel(
+                       condition <- "input.chooseAction == 1 || input.chooseAction == 2",
+                       column(3,
+                              selectInput("fileFormat", "Format of input file",
+                                          choices = list("fasta" =1, "fastq" =2, "bed" = 3), selected =1)),
+                       conditionalPanel(
+                         condtion <- "input.chooseAction == 2",
+                         column(3,
+                                selectInput("fileFormat2", "Format of input file",
+                                            choices = list("fasta" =1, "fastq" =2, "bed" = 3), selected =1))),
+                       conditionalPanel(
+                         condtion <- "input.fileFormat == 3 || input.fileFormat2 == 3",
+                         column(3,
+                                radioButtons("fileHeader", "Does input file contain a header?",
+                                             choices = list("Yes" = 1, "No" =2), selected = 2)
+                         )),
+                       column(3,
+                              selectInput("gRNAexport", "Export potential gRNAs in which format?",
+                                          choices = list("fasta" =1, "genbank" =2, "both" = 3, "none" = 4), selected =3))
+                     )),
                    fluidRow(
                      conditionalPanel(
                        condtion <- ("input.chooseAction == 1"),
@@ -146,16 +182,22 @@ shinyUI(fluidPage(
                      conditionalPanel(
                        condtion <- ("input.chooseAction == 1"),
                        column(4,
-                              textInput("chromSearch", "Chromosome to search:", value = "chrX"))
+                              textInput("chromSearch", "Chromosome to search:", value = "chrX")),
+                       column(4,
+                              radioButtons("annPaired1", "Annotate paired information?",
+                                           choices = c("Yes" = 1, "No" = 2), selected = 1))
                      ),
+                     conditionalPanel(
+                       condtion <- ("input.chooseAction == 2"),
+                       column(4,
+                              radioButtons("annPaired2", "Annotate paired information?",
+                                           choices = c("Yes" = 1, "No" = 2), selected = 2))),
                      conditionalPanel(
                        condtion <- ("input.chooseAction == 3"),
                        column(4,
                               numericInput("umicol", "Index of column containing the umi/first 
                                            few bases of sequence R1 reads",
-                                           value = 2))
-                     )
-                   )),
+                                           value = 2))))),
                  
                  
                  
@@ -165,12 +207,13 @@ shinyUI(fluidPage(
                    fluidRow(
                      column(6, actionLink("advanced", "Advanced Options"))),
                    conditionalPanel(
-                     condtion <- "input.advanced > 0",
+                     condition <- "input.advanced%2 == 1",
                      br(),
                      fluidRow(
                        column(12,
                               sliderInput("overlapgRNA", "Set overlap positions of gRNA and
-                                          restriction enzyme cut site", min = 0, max = 50,                    c(17, 18)))),
+                                          restriction enzyme cut site", min = 0, max = 50,                   
+                                          c(17, 18)))),
                      fluidRow(
                        column(4,
                               numericInput("gRNASize", "Enter gRNA size", value = 20)),
@@ -183,7 +226,8 @@ shinyUI(fluidPage(
                        conditionalPanel(
                          condition <- "input.chooseAction == 3",
                          column(4,
-                                numericInput("pamSize", "Set PAM length", value = 3)))
+                                numericInput("pamSize", "Set PAM length", value = 3))
+                         )
                      ),
                      conditionalPanel(
                        condtion <- "input.chooseAction == 1 || input.chooseAction == 2",
@@ -205,8 +249,7 @@ shinyUI(fluidPage(
                            column(4,
                                   checkboxGroupInput("searchDir", "Search direction",
                                                      choices = list("Both" = "both", "1to2" = "1to2", "2to1" = "2to1"),
-                                                     selected = c("both", "1to2", "2to1"))))
-                                )),
+                                                     selected = c("both", "1to2", "2to1")))))),
                      conditionalPanel(
                        condtion <- "input.chooseAction == 1 || input.chooseAction == 2",
                        fluidRow(
@@ -219,6 +262,13 @@ shinyUI(fluidPage(
                            column(4,
                                   radioButtons("multicore", "Enable parallel processing?",
                                                choices = list("Yes" = 1, "No" = 2),
+                                               selected = 2))),
+                         conditionalPanel(
+                           condtion <- "input.chooseAction == 2",
+                           column(4,
+                                  radioButtons("removeDetails", "Remove detailed gRNA information?",
+                                               choices = list("Yes(both files)" = 1, "No(both files)" = 2,
+                                                              "Yes(file1)/No(file2)" = 3, "No(file1)/Yes(file2)" = 4),
                                                selected = 2))))),
                      fluidRow(
                        conditionalPanel(
@@ -229,8 +279,7 @@ shinyUI(fluidPage(
                                 radioButtons("findgRNA1", "Find gRNAs from input sequences?",
                                              choices = c("Yes" = 1, "No" = 2), selected = 1)),
                          column(4,
-                                radioButtons("annPaired1", "Annotate paired information?",
-                                             choices = c("Yes" = 1, "No" = 2), selected = 1))),
+                                textInput("gRNAname", "Enter a prefix used when assigning a name to found gRNAs", "gRNA"))),
                        conditionalPanel(
                          condition <- "input.chooseAction == 2",
                          column(4,
@@ -239,13 +288,7 @@ shinyUI(fluidPage(
                                 radioButtons("findgRNA2", "Find gRNAs from input sequences?",
                                              choices = c("Yes (both inputs)" = 1, "No (both inputs)" = 2,
                                                          "Yes(input1)/No(input 2)" = 3, 
-                                                         "No(input1)/Yes(input2)" = 4), selected = 1)),
-                         column(4,
-                                radioButtons("annPaired2", "Annotate paired information?",
-                                             choices = c("Yes" = 1, "No" = 2), selected = 2))
-                         
-                       )
-                     ),
+                                                         "No(input1)/Yes(input2)" = 4), selected = 1)))),
                      
                      fluidRow(
                        conditionalPanel(
@@ -279,10 +322,10 @@ shinyUI(fluidPage(
                        conditionalPanel(
                          condition <- "input.chooseAction == 3",
                          column(4,
-                                 numericInput("distInterChrom", 
-                                              "Distance value to assign to paired reads that are alighned to different
+                                numericInput("distInterChrom", 
+                                             "Distance value to assign to paired reads that are alighned to different
                                                chromosome",
-                                              value = -1)),
+                                             value = -1)),
                          column(4,
                                 radioButtons("sameChrom", "Paired reads aligned to same chromosome?",
                                              choices = list("Yes" = 1, "No" = 2),
@@ -290,7 +333,7 @@ shinyUI(fluidPage(
                          column(4,
                                 numericInput("minReads", "Minimum number of reads to be considered a peak",
                                              value = 20L))
-                     )),
+                       )),
                      fluidRow(
                        conditionalPanel(
                          condition <- "input.chooseAction == 3",
@@ -300,20 +343,132 @@ shinyUI(fluidPage(
                                              value = 0.05)),
                          column(4,
                                 selectInput("stat", "Statistical test choice",
-                                             choices = list("poisson" = 1, "nbinom" = 2),
-                                             selected = 1)),
+                                            choices = list("poisson" = 1, "nbinom" = 2),
+                                            selected = 1)),
                          column(4,
                                 numericInput("distThreshold", "Maximum gap allowed between plus and negative strand peak",
-                                             value = 40))
-                       )),
+                                             value = 40)))),
+                     fluidRow(
+                         conditionalPanel(
+                           condition <- "input.chooseAction == 1",
+                         column(4, 
+                                numericInput("minScore", "Minimum score of an off target to be included in the final output",
+                                             value = 0)),
+                         column(4, 
+                                numericInput("top.N", "Top N off targets to be included in the final output",
+                                             value = 1000)))),
                      
                      fluidRow(
                        conditionalPanel(
+                         condition <- "input.chooseAction == 1",
+                         column(3, 
+                              numericInput("topNscore", "Top N off target used to calculate the total off target score",
+                                             value = 10)),
+                         column(3, 
+                                radioButtons("fetchSeq", "Fetch flank sequence of off target?",
+                                             choices = list("Yes" = 1, "No" = 2), selected = 1)),
+                         conditionalPanel(
+                           condition <- "input.fetchSeq == 1",
+                           column(3,
+                             numericInput("up.stream", "Upstream offset from the off target start", 200)),
+                           column(3,
+                           numericInput("down.stream", "Downstream offset from the off target start", 200)))),
+                       conditionalPanel(
+                         condition <- "input.chooseAction == 2",
+                         column(3,
+                                numericInput("up.stream", "Upstream offset from the off target start", 0)),
+                         column(3,
+                                numericInput("down.stream", "Downstream offset from the off target start", 0))),
+                       conditionalPanel(
                          condition <- "input.chooseAction == 3",
-                         column(12,
-                                textInput("weight", 
-                                             "Weights",
-                                             value ="0,0,0.014,0,0,0.395,0.317,0,0.389,0.079,0.445,0.508,0.613,0.851,0.732,0.828,0.615,0.804,0.685,0.583")))),
+                         column(3,
+                                numericInput("up.stream", "Upstream offset from the off target start", 50)),
+                         column(3,
+                                numericInput("down.stream", "Downstream offset from the off target start", 50))),
+                       conditionalPanel(
+                         condition <- "input.chooseAction == 2 || input.chooseAction == 3 ",
+                         column(6, 
+                                numericInput("PAMmismatch", "Number of degenerative bases in the PAM sequence",
+                                             value = 2)))),
+                     conditionalPanel(
+                       condition <- "input.chooseAction == 1 || input.chooseAction == 2",
+                       fluidRow(
+                         selectInput("scoringmethod", "Select method to use for offtarget cleavage rate
+                                     estimation", choices = list("Hsu-Zhang" = 1, "CFDscore"= 2),
+                                     selected = 1))),
+                     fluidRow(
+                       conditionalPanel(
+                         condition <- "input.scoringmethod == 1 || input.chooseAction == 3",
+                          print(strong("Weights")), br(),
+                          tags$textarea(id="weight", rows = 2, cols = 80, 
+                                        "0,0,0.014,0,0,0.395,0.317,0,0.389,0.079,0.445,0.508,0.613,0.851,0.732,0.828,0.615,0.804,0.685,0.583")
+                         ),
+                       br()
+                     ),
+                
+                     conditionalPanel(
+                         condition <- "input.scoringmethod == 2",
+                         br(),
+                         paste("Please see side panel for Mismatch Activity File Upload"),
+                         br(), br(),
+                         fluidRow(
+                           column(6,
+                                  numericInput("subPamPos1", "Start Position of Sub PAM", value = 22)),
+                           column(6,
+                           numericInput("subPamPos2", "End Position of Sub PAM", value = 23))),
+                         print("Sub PAM Activity Input:"),
+                         br(),
+                         column(3, numericInput("AA", "AA", value = 0)),
+                         column(3, numericInput("AC", "AC", value = 0)),
+                         column(3, numericInput("AG", "AG", value = 0.259259259)),
+                         column(3, numericInput("AT", "AT", value = 0)),
+                         column(3, numericInput("CA", "CA", value = 0)),
+                         column(3, numericInput("CC", "CC", value = 0)),
+                         column(3, numericInput("CG", "CG", value = 0.107142857)),
+                         column(3, numericInput("CT", "CT", value = 0)),
+                         column(3, numericInput("GA", "GA", value = 0.0694444440)),
+                         column(3, numericInput("GC", "GC", value = 0.022222222)),
+                         column(3, numericInput("GG", "GG", value = 1)),
+                         column(3, numericInput("GT", "GT", value = 0.016129032)),
+                         column(3, numericInput("TA", "TA", value = 0)),
+                         column(3, numericInput("TC", "TC", value = 0)),
+                         column(3, numericInput("TG", "TG", value = 0.038961039)),
+                         column(3, numericInput("TT", "TT", value = 0))),
+                     
+                     
+                     fluidRow(
+                       conditionalPanel(
+                         condition <- "input.chooseAction == 1",
+                         column(3,
+                                numericInput("upstreamSearch","Upstream offset from the bed input starts for gRNA search",
+                                             value = 0)),
+                         column(3,
+                                numericInput("downstreamSearch","Downstream offset from the bed input ends for gRNA search",
+                                             value = 0)),
+                         
+                         column(3,
+                                radioButtons("usescore", "Use score to indicate gRNA efficacy?",
+                                             choices = list("Yes" = 1, "No" = 2), selected = 1)),
+                         conditionalPanel(
+                           condition <- "input.usescore == 1",
+                           column(3, 
+                                  radioButtons("efficacyFromIS", "Use input sequences to calculate gRNA efficacy?",
+                                               choices = list("Yes" = 1, "No" = 2), selected = 2))))),
+                     fluidRow(
+                       conditionalPanel(
+                         condition <- "input.chooseAction == 3",
+                       column(4,
+                              numericInput("window", "Window size to calculate coverage", value = 20)),
+                       column(4,
+                              numericInput("stepSize", "Step size to calculate coverage", value = 20)),
+                       column(4,
+                              numericInput("BGWindow", "Background Window Size", value = 5000))
+                     )),
+                     fluidRow(
+                       radioButtons("adjustMethods", "Adjustment method for multiple comparisons",
+                                    choices = list("None" = 1, "BH" = 2, "holm" = 3, "hochberg" =4,
+                                                   "hommel"= 5, "bonferroni" =6, "BY" = 7, "fdr" = 8),
+                                    selected = 1, inline = TRUE)),
 
                      fluidRow(
                        column(4,
@@ -332,8 +487,8 @@ shinyUI(fluidPage(
                               radioButtons("overwriteFile", "Overwrite the existing files in output directory?",
                                            choices = c("Yes" = 1, "No" = 2), selected = 1))
                      )
-                     )#Well Panel for advanced settings
-                     ),
+                   )#Well Panel for advanced settings
+                 ),
                  fluidRow(
                    column(4, actionButton("goButton", "Submit"))
                  ),
@@ -342,26 +497,27 @@ shinyUI(fluidPage(
                    column(4, actionButton("resetFields", "Reset all fields to defaults"))
                  ),
                  uiOutput('output1')
-  ),#Tab for Submission Panel
-  
-  tabPanel("Data Table",
-           conditionalPanel(
-             condtion <- "input.chooseAction == 1",
-             titlePanel("RE Cut Details")
-           ),
-           conditionalPanel(
-             condtion <- "input.chooseAction == 2",
-             titlePanel("Scores for 2 Input Sequences")
-           ),
-           conditionalPanel(
-             condtion <- "input.chooseAction == 3",
-             titlePanel("gRNA Peaks")
-           ),
-           DT::dataTableOutput("tables")
-  )#Tab for Data Table Panel
+        ),#Tab for Submission Panel
+        
+        tabPanel("Data Table",
+                 conditionalPanel(
+                   condtion <- "input.chooseAction == 1",
+                   titlePanel("RE Cut Details")
+                 ),
+                 conditionalPanel(
+                   condtion <- "input.chooseAction == 2",
+                   titlePanel("Scores for 2 Input Sequences")
+                 ),
+                 conditionalPanel(
+                   condtion <- "input.chooseAction == 3",
+                   titlePanel("gRNA Peaks")
+                 ),
+                 DT::dataTableOutput("tables")
+        )#Tab for Data Table Panel
       )#Tabset Panel
     )#mainPanel
-      )#sidebarLayout
-  ))
+  )#sidebarLayout
+  )
+  )
 
 

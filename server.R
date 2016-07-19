@@ -80,11 +80,6 @@ options( shiny.maxRequestSize = 1000 * 1024 ^ 2,
     )
   }
   
-  observeEvent(input$hideShow, {
-    # every time the button is pressed, alternate between hiding and showing the plot
-    toggle("consolePanel")
-  })
-  
 output$output1 <- renderUI({
   
   #InputFilePath
@@ -100,6 +95,15 @@ output$output1 <- renderUI({
   }
   else {
     REpatternFile <- input$file2$datapath
+  }
+  #Mismatch Activity FIle
+  if(is.null(input$mismatchActivityFile)) {
+    mismatch.activity.file <- system.file("extdata", 
+                                          "NatureBiot2016SuppTable19DoenchRoot.csv", 
+                                          package = "CRISPRseek")
+  }
+  else {
+    mismatch.activity.file <- input$weightMatrixFile$datapath
   }
   #InputFile1Path for C2S
   if(is.null(input$file3)) {
@@ -142,6 +146,53 @@ output$output1 <- renderUI({
   isolate(  
       outputDir <- tempdir()
     )
+  
+  isolate(
+    if(input$fileFormat == 1) {
+      format <- "fasta"
+    }
+    else if(input$fileFormat == 2) {
+      format <- "fastq"
+    }
+    else if(input$fileFormat == 3) {
+      format <- "bed"
+    }
+  )
+  isolate(
+    if(input$chooseAction == 2) {
+    if(input$fileFormat2 == 1) {
+      format <- append(format, "fasta")
+    }
+    else if(input$fileFormat2 == 2) {
+      format <- append(format, "fastq")
+    }
+    else {
+      format <- append(format, "bed")
+    }}
+  )
+  
+  isolate(
+    if(input$gRNAexport == 1) {
+      exportAllgRNAs <- "fasta"
+    }
+    else if(input$gRNAexport == 2) {
+      exportAllgRNAs <- "genbank"
+    }
+    else if(input$gRNAexport == 3) {
+      exportAllgRNAs <- "all"
+    }
+    else {
+      exportAllgRNAs <- "no"
+    }
+  )
+  isolate(
+    if(input$fileHeader == 1) {
+      header = TRUE
+    }
+    else {
+      header = FALSE
+    }
+  )
     #Find gRNAs With RE Cut Only?
   isolate(
     if(input$chooseAction == 1) {
@@ -158,6 +209,16 @@ output$output1 <- renderUI({
       findgRNAsWithREcutOnly<- TRUE
       )
     })
+  
+  #Annotate paired?
+  isolate(
+    if(input$annPaired1 == 1 || input$annPaired2 == 1) {
+      annotatePaired <- TRUE
+    }
+    else {
+      annotatePaired <- FALSE
+    }
+  )
 
     #Find Paired gRNA only?
   isolate(
@@ -263,6 +324,10 @@ output$output1 <- renderUI({
     isolate(
     searchDirection <- append(searchDirection, input$searchDir)
     ) 
+    #grna name prefix
+    isolate(
+      gRNA.name.prefix <- input$gRNAname
+    )
     
     #Find gRNA from input?
     isolate(
@@ -372,30 +437,167 @@ output$output1 <- renderUI({
     isolate(
       PAM.pattern <- input$PAMpattern
     )
+    isolate(
+      allowed.mismatch.PAM <- input$PAMmismatch
+    )
     
     v <- as.numeric(unlist(strsplit(input$weight,",")))
     isolate(
       if(length(v) < gRNA.size) {
-        x <- (gRNA.size - length(weights))
+        x <- (gRNA.size - length(v))
         padZeros <- vector("numeric", length = x)
         weights <- append(padZeros, v)
       }
       else {
         weights <- v
       })
+    isolate(
+      min.score <- input$minScore)
+    isolate(
+      topN <- input$top.N)
+    isolate(
+    topN.OfftargetTotalScore <- input$topNscore)
+    isolate(
+      if(input$fetchSeq == 1) {
+        fetchSequence <- TRUE
+      }
+      else {
+        fetchSequence <- FALSE
+      })
+    isolate(
+      upstream <- input$up.stream
+    )
+    isolate(
+      downstream <- input$down.stream
+    )
+    isolate(
+      if(input$usescore == 1) {
+        useScore <- TRUE
+      }
+      else {
+        useScore <- FALSE
+      })
+    isolate(
+      if(input$efficacyFromIS == 1) {
+        useEfficacyFromInputSeq <- TRUE
+      }
+      else {
+        useEfficacyFromInputSeq <- FALSE
+      })
+    isolate(
+      if(input$scoringmethod == 1) {
+        scoring.method <- "Hsu-Zhang"
+      }
+      else {
+        scoring.method <- "CFDscore"
+      })
+    AA = input$AA
+    AC = input$AC
+    AG = input$AG
+    AT = input$AT
+    CA = input$CA
+    CC = input$CC
+    CG = input$CG
+    CT = input$CT
+    GA = input$GA
+    GC = input$GC
+    GG = input$GG
+    GT = input$GT
+    TA = input$TA
+    TC = input$TC
+    TG = input$TG
+    TT = input$TT
+    isolate(
+      subPAM.activity <- hash::hash("AA" = AA, "AC" = AC, "AG" = AG, "AT" = AT,
+                                    "CA" = CA, "CC" = CC, "CG" = CG, "CT" = CT,
+                                    "GA" = GA, "GC" = GC, "GG" = GG, "GT" = GT,
+                                    "TA" = TA, "TC" = TC, "TG" = TG, "TT" = TT))
+    isolate(
+      upstream.search <- input$upstreamSearch
+    )
+    isolate(
+      downstream.search <- input$downstreamSearch
+    )
+    isolate(
+      subPAM.position <- c(input$subPamPos1, input$subPamPos2)
+    )
+    isolate(
+      if(input$removeDetails == 1) {
+        removegRNADetails <- c(TRUE, TRUE)
+      }
+      else if(input$removeDetails == 2) {
+        removegRNADetails <- c(FALSE, FALSE)
+      }
+      else if(input$removeDetails == 3) {
+        removegRNADetails <- c(TRUE, FALSE)
+      }
+      else if(input$removeDetails == 4) {
+        removegRNADetails <- c(FALSE, TRUE)
+      }
+    )
+    isolate(
+      window.size <- input$window
+    )
+    isolate(
+      step <- input$stepSize
+    )
+    isolate(
+      bg.window.size <- input$BGWindow
+    )
+    isolate(
+      if(input$adjustMethods == 1) {
+        p.adjust.methods <- "none"
+      }
+      else if(input$adjustMethods == 2) {
+        p.adjust.methods <- "BH"
+      }
+      else if(input$adjustMethods == 3) {
+        p.adjust.methods <- "holm"
+      }
+      else if(input$adjustMethods == 4) {
+        p.adjust.methods <- "hochberg"
+      }
+      else if(input$adjustMethods == 5) {
+        p.adjust.methods <- "hommel"
+      }
+      else if(input$adjustMethods == 6) {
+        p.adjust.methods <- "bonferroni"
+      }
+      else if(input$adjustMethods == 7) {
+        p.adjust.methods <- "BY"
+      }      else if(input$adjustMethods == 8) {
+        p.adjust.methods <- "fdr"
+      }
+    )
+   #doesnt work
+    # isolate(
+     # if(input$PAMlocation == 1) {
+      #  PAM.location <- '3prime'
+      #}
+      #else {
+      #  PAM.location <- '5prime'
+     # }
+   # )
     
     #Run off target analysis
     resultsOTA <- eventReactive(input$goButton, {
       offTargetAnalysis(inputFilePath = inputFilePath, findgRNAsWithREcutOnly=findgRNAsWithREcutOnly,
-                        REpatternFile =REpatternFile,findPairedgRNAOnly=findPairedgRNAOnly,
-                        BSgenomeName = BSgenomeName, txdb=txdb,
+                        REpatternFile = REpatternFile, findPairedgRNAOnly = findPairedgRNAOnly, 
+                        annotatePaired = annotatePaired, BSgenomeName = BSgenomeName, txdb=txdb,
                         orgAnn = orgAnn,max.mismatch = input$mismatch, chromToSearch = chromToSearch,
                         outputDir = outputDir, overwrite = overwrite, 
                         overlap.gRNA.positions=overlap.gRNA.positions, gRNA.size = gRNA.size,
                         baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM,
                         max.gap = max.gap, annotateExon = annotateExon, enable.multicore = enable.multicore,
                         PAM.size = PAM.size, temperature = temperature, minREpatternSize = input$REPatSize1,
-                        findgRNAs = findgRNAs, PAM = PAM, PAM.pattern = PAM.pattern)
+                        findgRNAs = findgRNAs, PAM = PAM, PAM.pattern = PAM.pattern, format = format,
+                        header = header, exportAllgRNAs = exportAllgRNAs, gRNA.name.prefix = gRNA.name.prefix,
+                        min.score = min.score, topN = topN, topN.OfftargetTotalScore = topN.OfftargetTotalScore,
+                        fetchSequence = fetchSequence, upstream = upstream, downstream = downstream, weights = weights,
+                        featureWeightMatrixFile = featureWeightMatrixFile, useScore = useScore, 
+                        useEfficacyFromInputSeq = useEfficacyFromInputSeq, scoring.method = scoring.method, subPAM.activity = subPAM.activity,
+                        mismatch.activity.file = mismatch.activity.file, upstream.search = upstream.search,
+                        downstream.search = downstream.search, subPAM.position = subPAM.position)
       
     })
     
@@ -403,11 +605,16 @@ output$output1 <- renderUI({
     resultsC2S <- eventReactive(input$goButton, {
       compare2Sequences(inputFile1Path = inputFile1Path, inputFile2Path =inputFile2Path, REpatternFile = REpatternFile, outputDir = outputDir, 
                         overwrite = overwrite, BSgenomeName = BSgenomeName, findgRNAsWithREcutOnly=findgRNAsWithREcutOnly, 
-                        findPairedgRNAOnly=findPairedgRNAOnly,  overlap.gRNA.positions=overlap.gRNA.positions, 
+                        findPairedgRNAOnly=findPairedgRNAOnly, annotatePaired = annotatePaired,  overlap.gRNA.positions=overlap.gRNA.positions, 
                         gRNA.size = gRNA.size, baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM, 
                         min.gap = min.gap, max.gap = max.gap, PAM.size = PAM.size, temperature = temperature,
                         minREpatternSize = input$REPatSize2, findgRNAs = findgRNAs, max.mismatch = input$mismatch,
-                        searchDirection = searchDirection, PAM = PAM, PAM.pattern = PAM.pattern)
+                        searchDirection = searchDirection, PAM = PAM, PAM.pattern = PAM.pattern, allowed.mismatch.PAM = allowed.mismatch.PAM,
+                        scoring.method = scoring.method, subPAM.activity = subPAM.activity, weights = weights, 
+                        mismatch.activity.file = mismatch.activity.file, subPAM.position = subPAM.position, format = format,
+                        header = header, removegRNADetails = removegRNADetails, exportAllgRNAs = exportAllgRNAs, gRNA.name.prefix = gRNA.name.prefix,
+                        upstream = upstream, downstream = downstream
+                        )
     })
     
     #run GUIDEseqAnalysis
@@ -421,7 +628,9 @@ output$output1 <- renderUI({
                        umi.col = umi.col, concordant.strand = concordant.strand, max.paired.distance = max.paired.distance,
                        min.mapping.quality = min.mapping.quality, distance.inter.chrom = distance.inter.chrom,
                        apply.both.min.mapped = apply.both.min.mapped, min.reads = min.reads, maxP = maxP, stats = stats,
-                       distance.threshold = distance.threshold, weights = weights)})
+                       distance.threshold = distance.threshold, weights = weights, window.size = window.size,
+                       step = step, bg.window.size = bg.window.size, p.adjust.methods = p.adjust.methods,
+                       allowed.mismatch.PAM = allowed.mismatch.PAM, upstream = upstream, downstream = downstream, )})
     
     
     setwd(outputDir)
@@ -463,7 +672,7 @@ output$output1 <- renderUI({
     #Download output as zip file
     output$downloadData <- downloadHandler(
       filename = function() {
-        paste("crisprSeekOutput","zip", sep=".")
+        paste0("crisprSeekPlus_RunNumber", input$runNum,".zip")
       },
       content = function(fname) {
         crisprOutput <- list.files(path = outputDir)
@@ -477,6 +686,9 @@ output$output1 <- renderUI({
 
 #Reset all fields
 observeEvent(input$resetFields, {
+  reset("fileFormat")
+  reset("fileHeader")
+  reset("gRNAexport")
   reset("givenOutputDir") 
   reset("radio1") 
   reset("radio2") 
@@ -520,7 +732,44 @@ observeEvent(input$resetFields, {
   reset("stat")
   reset("distThreshold")
   reset("PAMpattern")
-  reset("weight")})
+  reset("weight")
+  reset("gRNAname")
+  reset("PAMmismatch")
+  reset("minScore")
+  reset("top.N")
+  reset("topNscore")
+  reset("fetchSeq")
+  reset("up.stream")
+  reset("down.stream")
+  reset("usescore")
+  reset("efficacyFromIS")
+  reset("scoringmethod")
+  reset("AA")
+  reset("AC")
+  reset("AG")
+  reset("AT")
+  reset("CA")
+  reset("CC")
+  reset("CG")
+  reset("CT")
+  reset("GA")
+  reset("GC")
+  reset("GG")
+  reset("GT")
+  reset("TA")
+  reset("TC")
+  reset("TG")
+  reset("TT")
+  reset("upstreamSearch")
+  reset("downstreamSearch")
+  reset("subPamPos1")
+  reset("subPamPos2")
+  reset("removeDetails")
+  reset("window")
+  reset("BGWindow")
+  reset("stepSize")
+  reset("adjustMethods")
+  reset("PAMlocation")})
 })
 
 
