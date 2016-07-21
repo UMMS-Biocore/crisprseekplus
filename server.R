@@ -585,7 +585,7 @@ output$output1 <- renderUI({
                         REpatternFile = REpatternFile, findPairedgRNAOnly = findPairedgRNAOnly, 
                         annotatePaired = annotatePaired, BSgenomeName = BSgenomeName, txdb=txdb,
                         orgAnn = orgAnn,max.mismatch = input$mismatch, chromToSearch = chromToSearch,
-                        outputDir = outputDir, overwrite = overwrite, 
+                        outputDir = outputDir, overwrite = overwrite, allowed.mismatch.PAM = allowed.mismatch.PAM,
                         overlap.gRNA.positions=overlap.gRNA.positions, gRNA.size = gRNA.size,
                         baseBeforegRNA =baseBeforegRNA, baseAfterPAM=baseAfterPAM,
                         max.gap = max.gap, annotateExon = annotateExon, enable.multicore = enable.multicore,
@@ -646,7 +646,7 @@ output$output1 <- renderUI({
     else if(isolate(input$chooseAction == 3)) {
       resultsGSA()
     }
-    
+
 
     #Data Tables
     output$tables <- DT::renderDataTable(DT::datatable({
@@ -654,6 +654,7 @@ output$output1 <- renderUI({
         return()
       }
       else {
+        
         if(input$chooseAction == 1) {
           data <- read.table(paste0(outputDir, "/RECutDetails.xls"),
                              header = TRUE)
@@ -672,7 +673,7 @@ output$output1 <- renderUI({
     #Download output as zip file
     output$downloadData <- downloadHandler(
       filename = function() {
-        paste0("crisprSeekPlus_RunNumber", input$runNum,".zip")
+        paste0("crisprSeekPlus_", input$runNum,".zip")
       },
       content = function(fname) {
         crisprOutput <- list.files(path = outputDir)
@@ -769,7 +770,78 @@ observeEvent(input$resetFields, {
   reset("BGWindow")
   reset("stepSize")
   reset("adjustMethods")
-  reset("PAMlocation")})
+  reset("PAMlocation")
+  reset("weight")})
+
+
+##################### VIEW INPUT FILES #####################
+  output$fileInput1 <- renderPrint(
+    if(is.null(input$file1)) {
+      print(read.csv(system.file("extdata", "inputseq.fa", package = "CRISPRseek")))
+    }
+    else {
+      print(read.csv(input$file1$datapath))
+    }
+  )
+
+  output$fileInput2 <- DT::renderDataTable(DT::datatable({
+    if(is.null(input$file2)) {
+    data <- read.csv(system.file("extdata", "NEBenzymes.fa", package = "CRISPRseek"), header = TRUE)
+    }
+    else {
+      data <- read.csv(input$file2$datapath)
+    }
+  }))
+  output$mismatchActivityInput <- DT::renderDataTable(DT::datatable({
+    if(is.null(input$mismatchActivityFile)) {
+      data <- read.csv(system.file("extdata", 
+                                   "NatureBiot2016SuppTable19DoenchRoot.csv", 
+                                   package = "CRISPRseek"))
+    }
+    else {
+      data <- read.csv(input$mismatchActivityFile$datapath)
+    }
+  }))
+  
+  output$fileInput3 <- renderPrint(
+    if(is.null(input$file3)) {
+      print(read.csv(system.file("extdata", "rs362331T.fa", package = "CRISPRseek")))
+    }
+    else {
+      print(read.csv(input$file3$datapath))
+    }
+  )
+  output$fileInput4 <- renderPrint(
+    if(is.null(input$file4)) {
+      print(read.csv(system.file("extdata", "rs362331C.fa", package = "CRISPRseek")))
+    }
+    else {
+      print(read.csv(input$file4$datapath))
+    }
+  )
+  
+  output$fileInput5 <- DT::renderDataTable(DT::datatable({
+    if(is.null(input$file5)) {
+          data <- read.csv(system.file("extdata", "UMI-HEK293_site4_chr13.txt", package = "GUIDEseq"))
+        }
+        else {
+          data <- read.csv(input$file5$datapath)
+        }
+      }))
+  output$fileInput7 <- renderPrint(
+    if(is.null(input$file7)) {
+      print(read.csv(system.file("extdata","gRNA.fa", package = "GUIDEseq")))
+    }
+    else {
+      print(read.csv(input$file7$datapath))
+    }
+  )
+
+  
+  
+  
+ 
+  
 })
 
 
