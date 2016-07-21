@@ -15,8 +15,9 @@ shinyUI(fluidPage(
     condition <- "input.goButton > 0",
     uiOutput("loading")
   ),
-  uiOutput("logo"),
-  titlePanel(h1("CRISPRseekPlus")),
+  
+  titlePanel(uiOutput("logo")),
+  titlePanel("CRISPRseekPlus"),
   br(),
   br(),
   br(),
@@ -138,7 +139,17 @@ shinyUI(fluidPage(
                            )),
                          column(3,
                                 selectInput("gRNAexport", "Export potential gRNAs in which format?",
-                                            choices = list("fasta" =1, "genbank" =2, "both" = 3, "none" = 4), selected =3))
+                                            choices = list("fasta" =1, "genbank" =2, "both" = 3, "none" = 4), selected =3)),
+                         conditionalPanel(
+                           condition<- "input.chooseAction == 1",
+                           column(3,
+                           selectInput("chromExclude", "Select Chromosome to Exlude",
+                                       choices = list("None" = 1, "chr17_ctg5_hap1" =2,"chr4_ctg9_hap1" =3, 
+                                                      "chr6_apd_hap1" =4, "chr6_cox_hap2" =5,
+                                                      "chr6_dbb_hap3" =6, "chr6_mann_hap4" = 7, "chr6_mcf_hap5" = 8,
+                                                      "chr6_qbl_hap6" = 9, "chr6_ssto_hap7" = 10), selected = 1))
+                         )
+                         
                        )),
                      fluidRow(
                        column(4,
