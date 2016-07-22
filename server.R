@@ -103,7 +103,7 @@ output$output1 <- renderUI({
                                           package = "CRISPRseek")
   }
   else {
-    mismatch.activity.file <- input$weightMatrixFile$datapath
+    mismatch.activity.file <- input$mismatchActivityFile$datapath
   }
   #InputFile1Path for C2S
   if(is.null(input$file3)) {
@@ -378,6 +378,7 @@ output$output1 <- renderUI({
     else {
       same.chromosome <- FALSE
     })
+    #Does UMI File contain a header?
     isolate(
       if(input$umiheader == 1) {
         umi.header <- TRUE
@@ -386,12 +387,15 @@ output$output1 <- renderUI({
         umi.header <- FALSE
       }
     )
+    #Index of the column containing the read identified in UMI file
     isolate(
       read.ID.col <- input$readID
     )
+    #Index of column containing umi or umi plus the first few bases of sequence from R1 reads
     isolate(
       umi.col <- input$umicol
     )
+    #specify whether R1/R2 should be aligned to the same or opposite strands
     isolate(
       if(input$concordantStrand == 1) {
         concordant.strand <- FALSE
@@ -400,15 +404,19 @@ output$output1 <- renderUI({
         concordant.strand <- TRUE
       }
     )
+    #Maximum distance allowed between R1/R2 reads
     isolate(
       max.paired.distance <- input$maxPairedDistance
     )
+    #Minimum mapping quality of acceptable alignments
     isolate(
       min.mapping.quality <- input$minMapQuality
     )
+    #Distance value to be assigned to paired reads aligned to different chromosomes
     isolate(
       distance.inter.chrom <- input$distInterChrom
     )
+    #apply minimum mapped length requirement to both r1/r2 reads
     isolate(
       if(input$applyMinMapped == 1) {
         apply.both.min.mapped <- TRUE
@@ -417,12 +425,15 @@ output$output1 <- renderUI({
         apply.both.min.mapped <- FALSE
       }
     )
+    #min number of reads to be considered as a peak
     isolate(
       min.reads <- input$minReads
     )
+    #maximum pcalue to be considered as significant
     isolate(
       maxP <- input$max.P
     )
+    #Statistical test
     isolate(
       if(input$stat == 1) {
         stats <- "poisson"
@@ -431,16 +442,19 @@ output$output1 <- renderUI({
         stats <- "nbinom"
       }
     )
+    #Max gap allowed between the plus strand and the negative strand peak
     isolate(
       distance.threshold <- input$distThreshold
     )
+    #PAM sequenece after the gRNA
     isolate(
       PAM.pattern <- input$PAMpattern
     )
+    #number of degenerative bases in the PAM sequence
     isolate(
       allowed.mismatch.PAM <- input$PAMmismatch
     )
-    
+    #weights to be used in SPcas9 system
     v <- as.numeric(unlist(strsplit(input$weight,",")))
     isolate(
       if(length(v) < gRNA.size) {
@@ -451,12 +465,16 @@ output$output1 <- renderUI({
       else {
         weights <- v
       })
+    #min score of an off target to be included in final output
     isolate(
       min.score <- input$minScore)
+    #top N off targets to be included in the final output
     isolate(
       topN <- input$top.N)
+    #top N off target used to calculate the total off target score
     isolate(
     topN.OfftargetTotalScore <- input$topNscore)
+    #Fetch flank sequence of off target or not
     isolate(
       if(input$fetchSeq == 1) {
         fetchSequence <- TRUE
@@ -464,12 +482,15 @@ output$output1 <- renderUI({
       else {
         fetchSequence <- FALSE
       })
+    #upstream offset from the off target start
     isolate(
       upstream <- input$up.stream
     )
+    #downstream offset from the off target end
     isolate(
       downstream <- input$down.stream
     )
+    # display in gray scale with the darkness indicating the gRNA efficacy
     isolate(
       if(input$usescore == 1) {
         useScore <- TRUE
@@ -477,6 +498,7 @@ output$output1 <- renderUI({
       else {
         useScore <- FALSE
       })
+    
     isolate(
       if(input$efficacyFromIS == 1) {
         useEfficacyFromInputSeq <- TRUE
@@ -484,6 +506,7 @@ output$output1 <- renderUI({
       else {
         useEfficacyFromInputSeq <- FALSE
       })
+    #Indicates which method to use for offtarget cleavage rate estimation
     isolate(
       if(input$scoringmethod == 1) {
         scoring.method <- "Hsu-Zhang"
@@ -491,6 +514,7 @@ output$output1 <- renderUI({
       else {
         scoring.method <- "CFDscore"
       })
+    #Sub PAM activity
     AA = input$AA
     AC = input$AC
     AG = input$AG
@@ -512,15 +536,19 @@ output$output1 <- renderUI({
                                     "CA" = CA, "CC" = CC, "CG" = CG, "CT" = CT,
                                     "GA" = GA, "GC" = GC, "GG" = GG, "GT" = GT,
                                     "TA" = TA, "TC" = TC, "TG" = TG, "TT" = TT))
+    #upstream offset from the bed input starts to search for gRNAs
     isolate(
       upstream.search <- input$upstreamSearch
     )
+    #downstream offset from the bed input ends to search for gRNAs
     isolate(
       downstream.search <- input$downstreamSearch
     )
+    #The start and end positions of the sub PAM.
     isolate(
       subPAM.position <- c(input$subPamPos1, input$subPamPos2)
     )
+    #whether to remove the detailed gRNA information such as efficacy file/restriction enzyme cut sites
     isolate(
       if(input$removeDetails == 1) {
         removegRNADetails <- c(TRUE, TRUE)
@@ -535,15 +563,19 @@ output$output1 <- renderUI({
         removegRNADetails <- c(FALSE, TRUE)
       }
     )
+    #window size to calculate coverage
     isolate(
       window.size <- input$window
     )
+    #step size to calculate coverage
     isolate(
       step <- input$stepSize
     )
+    #window size to calculate local background
     isolate(
       bg.window.size <- input$BGWindow
     )
+    #Adjustment method for multiple comparisons
     isolate(
       if(input$adjustMethods == 1) {
         p.adjust.methods <- "none"
@@ -578,6 +610,39 @@ output$output1 <- renderUI({
       #  PAM.location <- '5prime'
      # }
    # )
+    #Chromosome to exlude searchin in off target analysis
+  isolate(
+    if(input$chromExclude == 1) {
+      chromToExclude <- ""
+    }
+    else if(input$chromExclude == 2) {
+      chromToExclude <- "chr17_ctg5_hap1"
+    }
+    else if(input$chromExclude == 3) {
+      chromToExclude <- "chr4_ctg9_hap1"
+    }
+    else if(input$chromExclude == 4) {
+      chromToExclude <- "chr6_apd_hap1"
+    }
+    else if(input$chromExclude == 5) {
+      chromToExclude <- "chr6_cox_hap2"
+    }
+    else if(input$chromExclude == 6) {
+      chromToExclude <- "chr6_dbb_hap3"
+    }
+    else if(input$chromExclude == 7) {
+      chromToExclude <- "chr6_mann_hap4"
+    }
+    else if(input$chromExclude == 8) {
+      chromToExclude <- "chr6_mcf_hap5"
+    }
+    else if(input$chromExclude == 9) {
+      chromToExclude <- "chr6_qbl_hap6"
+    }
+    else if(input$chromExclude == 10) {
+      chromToExclude <- "chr6_ssto_hap7"
+    }
+  )
     
     #Run off target analysis
     resultsOTA <- eventReactive(input$goButton, {
@@ -594,10 +659,10 @@ output$output1 <- renderUI({
                         header = header, exportAllgRNAs = exportAllgRNAs, gRNA.name.prefix = gRNA.name.prefix,
                         min.score = min.score, topN = topN, topN.OfftargetTotalScore = topN.OfftargetTotalScore,
                         fetchSequence = fetchSequence, upstream = upstream, downstream = downstream, weights = weights,
-                        featureWeightMatrixFile = featureWeightMatrixFile, useScore = useScore, 
-                        useEfficacyFromInputSeq = useEfficacyFromInputSeq, scoring.method = scoring.method, subPAM.activity = subPAM.activity,
+                        useScore = useScore, useEfficacyFromInputSeq = useEfficacyFromInputSeq, 
+                        scoring.method = scoring.method, subPAM.activity = subPAM.activity,
                         mismatch.activity.file = mismatch.activity.file, upstream.search = upstream.search,
-                        downstream.search = downstream.search, subPAM.position = subPAM.position)
+                        downstream.search = downstream.search, subPAM.position = subPAM.position, chromToExclude = chromToExclude)
       
     })
     
@@ -635,9 +700,11 @@ output$output1 <- renderUI({
     
     setwd(outputDir)
     
+    #Toggle for download button
     disableDownload()
-
-      if(isolate(input$chooseAction == 1)) {
+    
+    #Run Program
+    if(isolate(input$chooseAction == 1)) {
        resultsOTA()
      }
      else if(isolate(input$chooseAction == 2)) {
@@ -654,17 +721,18 @@ output$output1 <- renderUI({
         return()
       }
       else {
-        
+        #OTA data table example
         if(input$chooseAction == 1) {
           data <- read.table(paste0(outputDir, "/RECutDetails.xls"),
                              header = TRUE)
         }
+        #C2S data table example
         else if(input$chooseAction == 2) {
           data <- read.table(paste0(outputDir, "/scoresFor2InputSequences.xls"),
                              colClasses = c(NA, NA, NA, NA, NA, "NULL", "NULL", "NULL", "NULL", "NULL", 
                                             "NULL", "NULL", "NULL", "NULL"), header = TRUE)
-          
         }
+        #GSA data table example
         else if(input$chooseAction == 3) {
           data <- read.table(paste0(outputDir, "/gRNA-peaks.xls"), header = TRUE)
         }
@@ -681,7 +749,6 @@ output$output1 <- renderUI({
       },
       contentType = "application/zip"
     )
-    
       return()
   })
 
@@ -771,7 +838,8 @@ observeEvent(input$resetFields, {
   reset("stepSize")
   reset("adjustMethods")
   reset("PAMlocation")
-  reset("weight")})
+  reset("weight")
+  reset("chromExlude")})
 
 
 ##################### VIEW INPUT FILES #####################
@@ -837,10 +905,6 @@ observeEvent(input$resetFields, {
     }
   )
 
-  
-  
-  
- 
   
 })
 
