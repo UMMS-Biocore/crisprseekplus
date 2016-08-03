@@ -1,0 +1,38 @@
+Package: crisprseekplus
+Type: Package
+Title: crisprseekplus
+Version: 0.99.0
+Date: 2016-07-25
+Author: Sophie Wigmore <Sophie.Wigmore@umassmed.edu>,
+    Alper Kucukural <alper.kucukural@umassmed.edu>
+Maintainer: Alper Kucukural <alper.kucukural@umassmed.edu>
+Description: Bioinformatics platform containing interface 
+    to work with offTargetAnalysis and compare2Sequences in 
+    the CRISPRseek package, and GUIDEseqAnalysis.
+Depends:
+    R (>= 3.3.1),
+    shiny,
+    shinyjs,
+    CRISPRseek
+License: GPL-3 + file LICENSE
+LazyData: true
+Imports:BSgenome.Hsapiens.UCSC.hg19,
+    TxDb.Hsapiens.UCSC.hg19.knownGene,
+    org.Hs.eg.db,
+    DT,
+    utils,
+    GUIDEseq,
+    GenomicRanges,
+    GenomicFeatures
+RoxygenNote: 5.0.1
+Suggests: testthat,
+    rmarkdown,
+    knitr,
+    R.rsp
+VignetteBuilder: knitr,  R.rsp
+URL: https://github.com/UMMS-Biocore/crisprseekplus
+BugReports: https://github.com/UMMS-Biocore/crisprseekplus/issues/new
+biocViews:
+    GeneRegulation,
+    SequenceMatching,
+    Software
