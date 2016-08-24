@@ -5,7 +5,7 @@
 #'
 #' @note \code{trueFalseFunc}
 #' @return true or false depending on input
-#' @param trueFalseFunc, return correct boolean
+#' @param input, user inputs
 #'
 #' @examples
 #'     x<- trueFalseFunc()

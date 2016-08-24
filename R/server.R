@@ -21,17 +21,21 @@
 #'             sidebarPanel  sliderInput  stopApp  tabPanel  tabsetPanel 
 #'             textInput  textOutput  titlePanel  uiOutput tags HTML
 #'             h4 img icon updateTabsetPanel  updateTextInput  validate 
-#'             wellPanel checkboxInput br checkboxGroupInput toggleState
-#' @importFrom shinyjs show hide enable disable reset useShinyjs extendShinyjs              
-#'             js inlineCSS
+#'             wellPanel checkboxInput br checkboxGroupInput
+#' @importFrom shinyjs hide enable disable reset useShinyjs extendShinyjs              
+#'             js inlineCSS toggleState
 #' @importFrom DT datatable dataTableOutput renderDataTable
-#' @importFrom utils read.csv read.table zip
+#' @importFrom utils read.csv read.table zip update.packages
 #' @import org.Hs.eg.db
+#' @importFrom hash hash
 #' @import GenomicRanges
+#' @import CRISPRseek
 #' @importFrom GenomicRanges GRanges
 #' @importFrom GenomicFeatures exons
 #' 
-
+#' @export
+#' 
+#' 
 cspServer <- function(input, output) {
   
 if (!interactive()) {
@@ -177,6 +181,8 @@ output$output1 <- renderUI({
         orgAnn = org.Dm.egSYMBOL 
     }
     else {
+        installpack("BSgenome.Hsapiens.UCSC.hg19")
+        installpack("TxDb.Hsapiens.UCSC.hg19.knownGene")
         orgAnn <- org.Hs.egSYMBOL
         BSgenomeName <- Hsapiens
         txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
