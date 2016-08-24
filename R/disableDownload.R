@@ -4,12 +4,11 @@
 #'
 #' @note \code{disableDownload}
 #' @return the download button either enabled or disabled;
-#' @param disableDownload, disable the download button
+#' @param input, disable the download button
 #'
 #' @examples
 #'     x<- disableDownload()
 #'
-#' @importFrom shiny toggleState
 #'
 #' @export
 #' 
