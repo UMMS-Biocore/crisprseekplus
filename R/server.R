@@ -52,7 +52,6 @@ output$logo <- renderUI({
 })
   
 output$output1 <- renderUI({
-    
     #InputFilePath
     inputFilePath <- fileInputFunc(input = input$file1$datapath, 
     sampleFile = system.file("extdata", "inputseq.fa", package = "CRISPRseek"))
@@ -83,11 +82,7 @@ output$output1 <- renderUI({
     #gRNA File for GSA
     gRNA.file <- fileInputFunc(input = input$file7$datapath, 
     sampleFile = system.file("extdata","gRNA.fa", package = "GUIDEseq"))
-    
-    #Output Directory
-    isolate(  
-            outputDir <- tempdir()
-    )
+    outputDir <- paste0(tempdir(), "/", input$runNum)
     
     isolate(
     if(input$fileFormat == 1) {
@@ -183,7 +178,7 @@ output$output1 <- renderUI({
     else {
         installpack("BSgenome.Hsapiens.UCSC.hg19")
         installpack("TxDb.Hsapiens.UCSC.hg19.knownGene")
-        orgAnn <- org.Hs.egSYMBOL
+        orgAnn <- "org.Hs.egSYMBOL"
         BSgenomeName <- Hsapiens
         txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
     }
@@ -347,7 +342,8 @@ output$output1 <- renderUI({
         allowed.mismatch.PAM <- input$PAMmismatch
     )
     #weights to be used in SPcas9 system
-    v <- as.numeric(unlist(strsplit(input$weight,",")))
+    v <- unlist(strsplit(input$weight,","))
+    v <- as.numeric(v[!is.na(v)])
     isolate(
         if(length(v) < gRNA.size) {
         x <- (gRNA.size - length(v))
@@ -569,10 +565,11 @@ output$output1 <- renderUI({
                     bg.window.size, p.adjust.methods = p.adjust.methods, 
                     allowed.mismatch.PAM = allowed.mismatch.PAM, 
                     upstream = upstream, downstream = downstream)})
-    
-    
+
+    if (!file.exists(outputDir)){
+        dir.create(outputDir)
+    }
     setwd(outputDir)
-    
     #Toggle for download button
     disableDownload(input$goButton)
     
