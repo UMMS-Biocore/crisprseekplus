@@ -30,6 +30,7 @@
 #' @importFrom hash hash
 #' @import GenomicRanges
 #' @import CRISPRseek
+#' @importFrom GUIDEseq GUIDEseqAnalysis
 #' @importFrom GenomicRanges GRanges
 #' @importFrom GenomicFeatures exons
 #' 
@@ -42,6 +43,7 @@ if (!interactive()) {
     options( shiny.maxRequestSize = 1000 * 1024 ^ 2,
              shiny.fullstacktrace = FALSE, shiny.trace=FALSE, 
              shiny.autoreload=TRUE)
+    library(crisprseekplus)
 }
   
 output$loading <- renderUI({
@@ -593,7 +595,7 @@ output$output1 <- renderUI({
     else {
     #OTA data table example
     if(input$chooseAction == 1) {
-        data <- read.table(paste0(outputDir, "/RECutDetails.xls"),
+        data <- read.table(paste0(outputDir, "/REcutDetails.xls"),
         header = TRUE)
         }
     #C2S data table example
