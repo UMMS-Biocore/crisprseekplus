@@ -30,6 +30,7 @@
 #' @importFrom hash hash
 #' @import GenomicRanges
 #' @import CRISPRseek
+#' @importFrom GUIDEseq GUIDEseqAnalysis
 #' @importFrom GenomicRanges GRanges
 #' @importFrom GenomicFeatures exons
 #' 
@@ -42,6 +43,7 @@ if (!interactive()) {
     options( shiny.maxRequestSize = 1000 * 1024 ^ 2,
              shiny.fullstacktrace = FALSE, shiny.trace=FALSE, 
              shiny.autoreload=TRUE)
+    library(crisprseekplus)
 }
   
 output$loading <- renderUI({
@@ -342,9 +344,14 @@ output$output1 <- renderUI({
         allowed.mismatch.PAM <- input$PAMmismatch
     )
     #weights to be used in SPcas9 system
-    v <- unlist(strsplit(input$weight,","))
-    v <- as.numeric(v[!is.na(v)])
     isolate(
+        v <- unlist(strsplit(input$weight,","))
+    )
+    isolate(
+        v <- as.numeric(v[!is.na(v)])
+    )
+    isolate(
+
         if(length(v) < gRNA.size) {
         x <- (gRNA.size - length(v))
         padZeros <- vector("numeric", length = x)
@@ -593,7 +600,7 @@ output$output1 <- renderUI({
     else {
     #OTA data table example
     if(input$chooseAction == 1) {
-        data <- read.table(paste0(outputDir, "/RECutDetails.xls"),
+        data <- read.table(paste0(outputDir, "/REcutDetails.xls"),
         header = TRUE)
         }
     #C2S data table example

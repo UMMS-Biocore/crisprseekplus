@@ -9,10 +9,11 @@
 #' @examples
 #'     x<- disableDownload()
 #'
-#'
+#' @importFrom shinyjs toggleState
 #' @export
 #' 
-disableDownload <- function(input){
+disableDownload <- function(input = NULL){ 
+  if (is.null(input)) return(NULL)
   toggleState(
     id = "downloadData",
     condition =  input > 0
