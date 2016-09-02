@@ -21,6 +21,5 @@ Enable or disable to download button depending on if analysis is complete
 \examples{
     x<- disableDownload()
 
-
 }
 
