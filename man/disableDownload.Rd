@@ -4,7 +4,7 @@
 \alias{disableDownload}
 \title{disableDownload}
 \usage{
-disableDownload(input)
+disableDownload(input = NULL)
 }
 \arguments{
 \item{input, }{disable the download button}
