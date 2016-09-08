@@ -14,7 +14,8 @@
 #' @export
 #
 
-fileInputFunc <- function(input, sampleFile) {
+fileInputFunc <- function(input = NULL, sampleFile = NULL) {
+  if (is.null(sampleFile)) return(NULL)
   if(is.null(input)) {
     sampleFile
   }

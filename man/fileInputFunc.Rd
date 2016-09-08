@@ -4,7 +4,7 @@
 \alias{fileInputFunc}
 \title{fileInputFunc}
 \usage{
-fileInputFunc(input, sampleFile)
+fileInputFunc(input = NULL, sampleFile = NULL)
 }
 \arguments{
 \item{input, }{enter correct files}
