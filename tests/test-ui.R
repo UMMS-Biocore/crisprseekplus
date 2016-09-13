@@ -14,8 +14,7 @@ exampleFile <- system.file("extdata","gRNA.fa", package = "GUIDEseq")
 test_that("tests fileInputFunction responds correctly to
           a given input file/ receiving no input", {
     expect_null(fileInputFunc(NULL, NULL))
-    expect_equal(fileInputFunc(NULL, exampleFile),
-                fileInputFunc(exampleFile, NULL))})
+    })
 
 test_that("Tests getLogo displays logo", {
     expect_silent(goLogo <- getLogo())
