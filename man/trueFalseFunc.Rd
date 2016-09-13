@@ -4,7 +4,7 @@
 \alias{trueFalseFunc}
 \title{trueFalseFunc}
 \usage{
-trueFalseFunc(input)
+trueFalseFunc(input = NULL)
 }
 \arguments{
 \item{input, }{user inputs}
