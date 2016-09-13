@@ -13,7 +13,8 @@
 #'
 #' @export
 #
-trueFalseFunc <- function(input) {
+trueFalseFunc <- function(input = NULL) {
+if (is.null(input)) return(NULL)
 if(input == 1) {
         TRUE
     }
