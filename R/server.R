@@ -33,7 +33,8 @@
 #' @importFrom GUIDEseq GUIDEseqAnalysis
 #' @importFrom GenomicRanges GRanges
 #' @importFrom GenomicFeatures exons
-#' 
+#' @import BSgenome.Hsapiens.UCSC.hg19
+#' @import TxDb.Hsapiens.UCSC.hg19.knownGene
 #' @export
 #' 
 #' 
