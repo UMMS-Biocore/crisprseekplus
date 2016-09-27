@@ -21,7 +21,8 @@
 #'             sidebarPanel  sliderInput  stopApp  tabPanel  tabsetPanel 
 #'             textInput  textOutput  titlePanel  uiOutput tags HTML
 #'             h4 img icon updateTabsetPanel  updateTextInput  validate 
-#'             wellPanel checkboxInput br checkboxGroupInput
+#'             wellPanel checkboxInput br checkboxGroupInput a strong
+#'             renderPrint fluidRow
 #' @importFrom shinyjs hide enable disable reset useShinyjs extendShinyjs              
 #'             js inlineCSS toggleState
 #' @importFrom DT datatable dataTableOutput renderDataTable
