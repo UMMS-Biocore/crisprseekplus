@@ -9,15 +9,18 @@ installpack(package_name = NULL)
 \arguments{
 \item{package_name, }{package name to be installed}
 }
+\value{
+install package
+}
 \description{
-install packages if they don't exist
-display.
+install packages if they don't exist display.
 }
 \note{
 \code{installpack}
 }
 \examples{
-    x <- installpack()
+    x<- installpack()
+
 
 }
 

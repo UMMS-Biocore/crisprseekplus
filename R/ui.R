@@ -21,8 +21,7 @@ shinyjs::useShinyjs(),
   
 conditionalPanel(
 condition <- "input.goButton > 0", uiOutput("loading")),
-  
-    titlePanel(uiOutput("logo")),
+    uiOutput("logo"),
     titlePanel("CRISPRseekPlus"),
     br(),
     br(),

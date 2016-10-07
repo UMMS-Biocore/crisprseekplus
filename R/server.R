@@ -23,19 +23,19 @@
 #'             h4 img icon updateTabsetPanel  updateTextInput  validate 
 #'             wellPanel checkboxInput br checkboxGroupInput a strong
 #'             renderPrint fluidRow
-#' @importFrom shinyjs hide enable disable reset useShinyjs extendShinyjs              
+#' @importFrom shinyjs hide enable disable reset useShinyjs extendShinyjs
 #'             js inlineCSS toggleState
 #' @importFrom DT datatable dataTableOutput renderDataTable
 #' @importFrom utils read.csv read.table zip update.packages
-#' @import org.Hs.eg.db
 #' @importFrom hash hash
 #' @import GenomicRanges
 #' @import CRISPRseek
 #' @importFrom GUIDEseq GUIDEseqAnalysis
+#' @importFrom BSgenome getBSgenome
 #' @importFrom GenomicRanges GRanges
 #' @importFrom GenomicFeatures exons
-#' @import BSgenome.Hsapiens.UCSC.hg19
-#' @import TxDb.Hsapiens.UCSC.hg19.knownGene
+#' @importFrom BiocInstaller biocLite
+#' @importFrom AnnotationDbi get
 #' @export
 #' 
 #' 
@@ -43,8 +43,8 @@ cspServer <- function(input, output) {
   
 if (!interactive()) {
     options( shiny.maxRequestSize = 1000 * 1024 ^ 2,
-             shiny.fullstacktrace = FALSE, shiny.trace=FALSE, 
-             shiny.autoreload=TRUE)
+            shiny.fullstacktrace = FALSE, shiny.trace=FALSE, 
+            shiny.autoreload=TRUE)
     library(crisprseekplus)
 }
   
@@ -58,23 +58,28 @@ output$logo <- renderUI({
 output$output1 <- renderUI({
     #InputFilePath
     inputFilePath <- fileInputFunc(input = input$file1$datapath, 
-    sampleFile = system.file("extdata", "inputseq.fa", package = "CRISPRseek"))
+    sampleFile = system.file("extdata", "inputseq.fa", 
+        package = "CRISPRseek"))
     #REpatternFile
     REpatternFile <- fileInputFunc(input = input$file2$datapath,
-    sampleFile = system.file("extdata", "NEBenzymes.fa", package = "CRISPRseek"))
+    sampleFile = system.file("extdata", "NEBenzymes.fa", 
+        package = "CRISPRseek"))
     #Mismatch Activity FIle
-    mismatch.activity.file <- fileInputFunc(input = input$mismatchActivityFile$datapath,
-    sampleFile = system.file("extdata", "NatureBiot2016SuppTable19DoenchRoot.csv", 
+    mismatch.activity.file <- fileInputFunc(input = 
+        input$mismatchActivityFile$datapath,
+    sampleFile = system.file("extdata", 
+        "NatureBiot2016SuppTable19DoenchRoot.csv", 
     package = "CRISPRseek"))
-    
+
     #InputFile1Path for C2S
     inputFile1Path <- fileInputFunc(input = input$file3$datapath, 
     sampleFile = system.file("extdata", "rs362331T.fa",
     package = "CRISPRseek"))
     #InputFile2Path for C2S
     inputFile2Path <- fileInputFunc(input = input$file4$datapath, 
-    sampleFile = system.file("extdata", "rs362331C.fa", package = "CRISPRseek"))
-    
+    sampleFile = system.file("extdata", "rs362331C.fa", 
+        package = "CRISPRseek"))
+
     #UMI File for GSA
     umifile <- fileInputFunc(input = input$file5$datapath, 
     sampleFile = system.file("extdata", "UMI-HEK293_site4_chr13.txt",
@@ -87,7 +92,7 @@ output$output1 <- renderUI({
     gRNA.file <- fileInputFunc(input = input$file7$datapath, 
     sampleFile = system.file("extdata","gRNA.fa", package = "GUIDEseq"))
     outputDir <- paste0(tempdir(), "/", input$runNum)
-    
+
     isolate(
     if(input$fileFormat == 1) {
         format <- "fasta"
@@ -107,7 +112,7 @@ output$output1 <- renderUI({
     else {
         format <- append(format, "bed")}}
     )
-    
+
     isolate(
     if(input$gRNAexport == 1) {
         exportAllgRNAs <- "fasta"}
@@ -127,7 +132,7 @@ output$output1 <- renderUI({
     else {
         findgRNAsWithREcutOnly<- trueFalseFunc(input$radio3)}
     )
-    
+
     #Annotate paired?
     isolate(
     if(input$annPaired1 == 1 || input$annPaired2 == 1) {
@@ -135,7 +140,7 @@ output$output1 <- renderUI({
     else {
         annotatePaired <- FALSE}
     )
-    
+
     #Find Paired gRNA only?
     isolate(
     if(input$chooseAction == 1) {
@@ -143,60 +148,62 @@ output$output1 <- renderUI({
     else {
         findPairedgRNAOnly <- trueFalseFunc(input$radio4)}
     )
-    
+
     #Input Organism: updates txdb, BSGenomeName, and orgAnn
     isolate(
     if(input$organism == "mm10") {
         installpack("org.Mm.eg.db")
         installpack("BSgenome.Mmusculus.UCSC.mm10")
         installpack("TxDb.Mmusculus.UCSC.mm10.knownGene")
-        BSgenomeName <- Mmusculus
-        txdb <- TxDb.Mmusculus.UCSC.mm10.knownGene
-        orgAnn <- org.Mm.egSYMBOL
+        BSgenomeName <- getBSgenome("BSgenome.Mmusculus.UCSC.mm10")
+        txdb <-  get("TxDb.Mmusculus.UCSC.mm10.knownGene")
+        orgAnn <- "org.Mm.egSYMBOL"
     }
-      
+
     else if(input$organism == "ce6") {
         installpack("BSgenome.Celegans.UCSC.ce6")
         installpack("TxDb.Celegans.UCSC.ce6.ensGene")
         installpack("org.Ce.eg.db")
-        BSgenomeName= Celegans
-        txdb=TxDb.Celegans.UCSC.ce6.ensGene
-        orgAnn = org.Ce.egSYMBOL 
+        BSgenomeName <- getBSgenome("BSgenome.Celegans.UCSC.ce6")
+        txdb <-  get("TxDb.Celegans.UCSC.ce6.ensGene")
+        orgAnn <- "org.Ce.egSYMBOL" 
     }
     else if(input$organism == "rn5") {
         installpack("BSgenome.Rnorvegicus.UCSC.rn5")
         installpack("TxDb.Rnorvegicus.UCSC.rn5.refGene")
         installpack("org.Rn.eg.db")
-        BSgenomeName= Rnorvegicus
-        txdb=TxDb.Rnorvegicus.UCSC.rn5.refGene
-        orgAnn = org.Rn.egSYMBOL
+        BSgenomeName <- getBSgenome("BSgenome.Rnorvegicus.UCSC.rn5")
+        txdb <-  get("TxDb.Rnorvegicus.UCSC.rn5.refGene")
+        orgAnn <- "org.Rn.egSYMBOL"
     }
-      else if(input$organism == "dm3") {
+    else if(input$organism == "dm3") {
         installpack("BSgenome.Dmelanogaster.UCSC.dm3")
         installpack("TxDb.Dmelanogaster.UCSC.dm3.ensGene")
         installpack("org.Dm.eg.db")
-        BSgenomeName= Dmelanogaster
-        txdb=TxDb.Dmelanogaster.UCSC.dm3.ensGene
-        orgAnn = org.Dm.egSYMBOL 
+        BSgenomeName <- getBSgenome("BSgenome.Dmelanogaster.UCSC.dm3")
+        txdb <-  get("TxDb.Dmelanogaster.UCSC.dm3.ensGene")
+        orgAnn <- "org.Dm.egSYMBOL" 
     }
     else {
         installpack("BSgenome.Hsapiens.UCSC.hg19")
         installpack("TxDb.Hsapiens.UCSC.hg19.knownGene")
+        installpack("org.Hs.eg.db")
         orgAnn <- "org.Hs.egSYMBOL"
-        BSgenomeName <- Hsapiens
-        txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+        BSgenomeName <- getBSgenome("BSgenome.Hsapiens.UCSC.hg19")
+        txdb <- get("TxDb.Hsapiens.UCSC.hg19.knownGene")
     }
     )
     #Chromosome to Search?
     isolate(
         chromToSearch <- input$chromSearch
     )
-    
+
     #Advanced Settings 
-    
+
     #Change default gRNA/RE cut size overlap positions
     isolate(
-        overlap.gRNA.positions <- c(input$overlapgRNA[1], input$overlapgRNA[2]))
+        overlap.gRNA.positions <- c(input$overlapgRNA[1], 
+        input$overlapgRNA[2]))
     #Change the input size of the gRNA
     isolate(
         gRNA.size <- input$gRNASize)
@@ -241,7 +248,7 @@ output$output1 <- renderUI({
     isolate(
         gRNA.name.prefix <- input$gRNAname
     )
-    
+
     #Find gRNA from input?
     isolate(
     if(input$chooseAction == 1) {
@@ -295,7 +302,8 @@ output$output1 <- renderUI({
     isolate(
         umi.col <- input$umicol
     )
-    #specify whether R1/R2 should be aligned to the same or opposite strands
+    #specify whether R1/R2 should be aligned to the same or 
+    #opposite strands
     isolate(
         concordant.strand <- trueFalseFunc(input$concordantStrand))
     #Maximum distance allowed between R1/R2 reads
@@ -353,7 +361,6 @@ output$output1 <- renderUI({
         v <- as.numeric(v[!is.na(v)])
     )
     isolate(
-
         if(length(v) < gRNA.size) {
         x <- (gRNA.size - length(v))
         padZeros <- vector("numeric", length = x)
@@ -387,7 +394,7 @@ output$output1 <- renderUI({
     #indicating the gRNA efficacy
     isolate(
         useScore <- trueFalseFunc(input$usescore)
-        )
+    )
     isolate(
         useEfficacyFromInputSeq <- trueFalseFunc(input$efficacyFromIS))
     #Indicates which method to use for offtarget 
@@ -492,9 +499,9 @@ output$output1 <- renderUI({
     )
     #Chromosome to exclude searching in off target analysis
     isolate(
-        chromToExclude <- as.character(unlist(strsplit(input$chromExclude,",")))
+        chromToExclude <- as.character(unlist(strsplit(
+            input$chromExclude,",")))
     )
-    
     #Run off target analysis
     resultsOTA <- eventReactive(input$goButton, {
     offTargetAnalysis(inputFilePath = inputFilePath, 
@@ -505,30 +512,39 @@ output$output1 <- renderUI({
                     BSgenomeName = BSgenomeName, txdb=txdb,
                     orgAnn = orgAnn,max.mismatch = input$mismatch,
                     chromToSearch = chromToSearch, outputDir = outputDir, 
-                    overwrite = overwrite, allowed.mismatch.PAM = allowed.mismatch.PAM,
+                    overwrite = overwrite, allowed.mismatch.PAM = 
+                    allowed.mismatch.PAM,
                     overlap.gRNA.positions=overlap.gRNA.positions, 
                     gRNA.size = gRNA.size, baseBeforegRNA =baseBeforegRNA, 
                     baseAfterPAM=baseAfterPAM,max.gap = max.gap, 
-                    annotateExon = annotateExon, enable.multicore = enable.multicore, 
+                    annotateExon = annotateExon, enable.multicore = 
+                    enable.multicore, 
                     PAM.size = PAM.size, temperature = temperature, 
-                    minREpatternSize = input$REPatSize1, findgRNAs = findgRNAs, 
+                    minREpatternSize = input$REPatSize1, 
+                    findgRNAs = findgRNAs, 
                     PAM = PAM, PAM.pattern = PAM.pattern, format = format,
                     header = header, exportAllgRNAs = exportAllgRNAs, 
-                    gRNA.name.prefix = gRNA.name.prefix,min.score = min.score, 
-                    topN = topN, topN.OfftargetTotalScore = topN.OfftargetTotalScore,
+                    gRNA.name.prefix = gRNA.name.prefix, min.score = 
+                    min.score,  topN = topN, topN.OfftargetTotalScore = 
+                    topN.OfftargetTotalScore,
                     fetchSequence = fetchSequence, upstream = upstream, 
-                    downstream = downstream, weights = weights, useScore = useScore, 
+                    downstream = downstream, weights = weights, 
+                    useScore = useScore, 
                     useEfficacyFromInputSeq = useEfficacyFromInputSeq, 
-                    scoring.method = scoring.method, subPAM.activity = subPAM.activity,
+                    scoring.method = scoring.method, subPAM.activity = 
+                    subPAM.activity,
                     mismatch.activity.file = mismatch.activity.file, 
-                    upstream.search = upstream.search,downstream.search = downstream.search,
-                    subPAM.position = subPAM.position, chromToExclude = chromToExclude)
+                    upstream.search = upstream.search, 
+                    downstream.search = downstream.search,
+                    subPAM.position = subPAM.position, 
+                    chromToExclude = chromToExclude)
       
     })
-    
+
     #run compare 2 sequences
     resultsC2S <- eventReactive(input$goButton, {
-    compare2Sequences(inputFile1Path = inputFile1Path, inputFile2Path =inputFile2Path, 
+    compare2Sequences(inputFile1Path = inputFile1Path, 
+                    inputFile2Path =inputFile2Path, 
                     REpatternFile = REpatternFile, outputDir = outputDir, 
                     overwrite = overwrite, BSgenomeName = BSgenomeName, 
                     findgRNAsWithREcutOnly=findgRNAsWithREcutOnly, 
@@ -538,7 +554,8 @@ output$output1 <- renderUI({
                     baseBeforegRNA =baseBeforegRNA, min.gap = min.gap, 
                     baseAfterPAM=baseAfterPAM, max.gap = max.gap, 
                     PAM.size = PAM.size, temperature = temperature,
-                    minREpatternSize = input$REPatSize2, findgRNAs = findgRNAs, 
+                    minREpatternSize = input$REPatSize2, 
+                    findgRNAs = findgRNAs, 
                     max.mismatch = input$mismatch,
                     searchDirection = searchDirection, PAM = PAM,
                     PAM.pattern = PAM.pattern,allowed.mismatch.PAM 
@@ -548,10 +565,11 @@ output$output1 <- renderUI({
                     subPAM.position = subPAM.position, format = format,
                     header = header, removegRNADetails = removegRNADetails,
                     exportAllgRNAs = exportAllgRNAs, gRNA.name.prefix = 
-                    gRNA.name.prefix, upstream = upstream, downstream = downstream
-      )
+                    gRNA.name.prefix, upstream = upstream, 
+                    downstream = downstream
+        )
     })
-    
+
     #run GUIDEseqAnalysis
     resultsGSA <- eventReactive(input$goButton, {
     GUIDEseqAnalysis(alignment.inputfile = bamfile, umi.inputfile = umifile,
@@ -559,9 +577,12 @@ output$output1 <- renderUI({
                     outputDir = outputDir, overlap.gRNA.positions = 
                     overlap.gRNA.positions, PAM.size = PAM.size, PAM.pattern 
                     = PAM.pattern, gRNA.size = gRNA.size,
-                    PAM = PAM, max.mismatch = input$mismatch,overwrite = overwrite, 
-                    min.R1.mapped = min.R1.mapped, min.R2.mapped = min.R2.mapped,
-                    same.chromosome = same.chromosome, umi.header = umi.header, 
+                    PAM = PAM, max.mismatch = input$mismatch,
+                    overwrite = overwrite, 
+                    min.R1.mapped = min.R1.mapped, 
+                    min.R2.mapped = min.R2.mapped,
+                    same.chromosome = same.chromosome, 
+                    umi.header = umi.header, 
                     read.ID.col = read.ID.col, umi.col = umi.col, 
                     concordant.strand = concordant.strand,
                     max.paired.distance = max.paired.distance,
@@ -569,9 +590,11 @@ output$output1 <- renderUI({
                     distance.inter.chrom = distance.inter.chrom,
                     apply.both.min.mapped = apply.both.min.mapped,
                     min.reads = min.reads, maxP = maxP, stats = stats,
-                    distance.threshold = distance.threshold, weights = weights,
-                    window.size = window.size, step = step, bg.window.size = 
-                    bg.window.size, p.adjust.methods = p.adjust.methods, 
+                    distance.threshold = distance.threshold, 
+                    weights = weights,
+                    window.size = window.size, step = step, 
+                    bg.window.size = bg.window.size, 
+                    p.adjust.methods = p.adjust.methods, 
                     allowed.mismatch.PAM = allowed.mismatch.PAM, 
                     upstream = upstream, downstream = downstream)})
 
@@ -581,7 +604,7 @@ output$output1 <- renderUI({
     setwd(outputDir)
     #Toggle for download button
     disableDownload(input$goButton)
-    
+
     #Run Program
     if(isolate(input$chooseAction == 1)) {
         resultsOTA()
@@ -592,8 +615,7 @@ output$output1 <- renderUI({
     else if(isolate(input$chooseAction == 3)) {
         resultsGSA()
     }
-    
-    
+
     #Data Tables
     output$tables <- DT::renderDataTable(DT::datatable({
     if(input$goButton < 1) {
@@ -607,7 +629,8 @@ output$output1 <- renderUI({
         }
     #C2S data table example
     else if(input$chooseAction == 2) {
-        data <- read.table(paste0(outputDir, "/scoresFor2InputSequences.xls"),
+        data <- read.table(paste0(outputDir, 
+            "/scoresFor2InputSequences.xls"),
         colClasses = c(NA, NA, NA, NA, NA, "NULL", "NULL", "NULL", 
         "NULL", "NULL", "NULL", "NULL", "NULL", "NULL"),
         header = TRUE)
@@ -720,8 +743,7 @@ output$output1 <- renderUI({
     reset("PAMlocation")
     reset("weight")
     reset("chromExlude")})
-  
-  
+
 ##################### VIEW INPUT FILES #####################
 output$fileInput1 <- renderPrint(
     if(is.null(input$file1)) {
@@ -768,12 +790,13 @@ output$fileInput4 <- renderPrint(
     })
 output$fileInput5 <- DT::renderDataTable(DT::datatable({
     if(is.null(input$file5)) {
-        data <- read.csv(system.file("extdata", "UMI-HEK293_site4_chr13.txt",
+        data <- read.csv(system.file("extdata", 
+            "UMI-HEK293_site4_chr13.txt",
         package = "GUIDEseq"))
     }
     else {
         data <- read.csv(input$file5$datapath)}
-  }))
+}))
 output$fileInput7 <- renderPrint(
     if(is.null(input$file7)) {
         print(read.csv(system.file("extdata","gRNA.fa",
