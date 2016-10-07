@@ -45,7 +45,7 @@ if (!interactive()) {
     options( shiny.maxRequestSize = 1000 * 1024 ^ 2,
             shiny.fullstacktrace = FALSE, shiny.trace=FALSE, 
             shiny.autoreload=TRUE)
-    library(crisprseekplus)
+    #library(crisprseekplus)
 }
   
 output$loading <- renderUI({
