@@ -1,7 +1,7 @@
 Package: crisprseekplus
 Type: Package
 Title: crisprseekplus
-Version: 0.99.6
+Version: 0.99.7
 Date: 2016-07-25
 Author: Sophie Wigmore <Sophie.Wigmore@umassmed.edu>,
     Alper Kucukural <alper.kucukural@umassmed.edu>,
@@ -19,14 +19,15 @@ Depends:
     CRISPRseek
 License: GPL-3 + file LICENSE
 LazyData: true
-Imports:BSgenome.Hsapiens.UCSC.hg19,
-    TxDb.Hsapiens.UCSC.hg19.knownGene,
-    org.Hs.eg.db,
+Imports:
     DT,
     utils,
     GUIDEseq,
     GenomicRanges,
     GenomicFeatures,
+    BiocInstaller,
+    BSgenome,
+    AnnotationDbi,
     hash
 RoxygenNote: 5.0.1
 Suggests: testthat,

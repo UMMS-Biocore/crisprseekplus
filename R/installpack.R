@@ -1,16 +1,19 @@
 #' installpack
 #'
-#' install packages if they don't exist
-#' display.
+#' install packages if they don't exist display.
 #'
-#' @param package_name, package name to be installed
 #' @note \code{installpack}
+#' @return install package
+#' @param package_name, package name to be installed
 #'
 #' @examples
-#'     x <- installpack()
+#'     x<- installpack()
+#'
 #'
 #' @export
-#'
+#
+
+
 installpack <- function(package_name = NULL) {
   if (is.null(package_name)) return(NULL)
   if(isTRUE(package_name %in% .packages(all.available=TRUE))) {
@@ -28,4 +31,4 @@ installpack <- function(package_name = NULL) {
     eval(parse(text = sprintf("biocLite(\"%s\")", package_name)))
     eval(parse(text = sprintf("require(\"%s\")", package_name)))
   }
-  }
+}
